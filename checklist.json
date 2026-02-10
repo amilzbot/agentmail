@@ -14,9 +14,9 @@
       "tasks": [
         {
           "id": "setup-01",
-          "description": "Scaffold project from pinocchio-counter template (create-solana-dapp)",
+          "description": "Scaffold project from agentmail template (create-solana-dapp)",
           "status": "done",
-          "notes": "✓ Successfully scaffolded from pinocchio-counter template. Project structure created with Rust program, TypeScript clients, and build tooling."
+          "notes": "✓ Successfully scaffolded from agentmail template. Project structure created with Rust program, TypeScript clients, and build tooling."
         },
         {
           "id": "research-01",

@@ -18,7 +18,7 @@ build: generate-idl generate-clients
 
 # Format / lint code
 fmt:
-    cargo fmt -p pinocchio-counter -p tests-pinocchio-counter
+    cargo fmt -p agentmail -p tests-agentmail
     @cd program && cargo clippy --all-targets -- -D warnings
     @cd tests && cargo clippy --all-targets -- -D warnings
     pnpm format
@@ -31,11 +31,11 @@ check:
 
 # Run unit tests
 unit-test:
-    cargo test -p pinocchio-counter
+    cargo test -p agentmail
 
 # Run integration tests
 integration-test *args:
-    cargo test -p tests-pinocchio-counter "$@"
+    cargo test -p tests-agentmail "$@"
 
 # Run all tests
 test *args: build unit-test (integration-test args)
@@ -45,6 +45,6 @@ sync-program-id program_id:
     @echo "Syncing program ID: {{program_id}}"
     @sed -i '' 's/declare_id!("[^"]*")/declare_id!("{{program_id}}")/' program/src/lib.rs
     @echo "Updated program/src/lib.rs"
-    @sed -i '' "s/const PINOCCHIO_COUNTER_PROGRAM_ID = '[^']*'/const PINOCCHIO_COUNTER_PROGRAM_ID = '{{program_id}}'/" scripts/lib/updates/set-instruction-account-default-values.ts
+    @sed -i '' "s/const AGENTMAIL_PROGRAM_ID = '[^']*'/const AGENTMAIL_PROGRAM_ID = '{{program_id}}'/" scripts/lib/updates/set-instruction-account-default-values.ts
     @echo "Updated scripts/lib/updates/set-instruction-account-default-values.ts"
     @echo "Remember to run 'just generate-clients' to update TypeScript/Rust clients"

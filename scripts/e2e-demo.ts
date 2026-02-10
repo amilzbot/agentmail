@@ -13,8 +13,7 @@
  * For production, would use on-chain Solana registry.
  */
 
-import { Keypair } from '@solana/web3.js'
-import { generatePrivateKey, getAddressFromPrivateKey } from '@solana/addresses'
+import { generateKeyPair, getAddressFromPublicKey } from '@solana/kit'
 import * as fs from 'fs'
 import * as path from 'path'
 import { spawn, ChildProcess } from 'child_process'
@@ -101,7 +100,7 @@ function createMessage(from: string, to: string, subject: string, body: string):
 }
 
 // Mock signing (in real implementation, would use @solana/kit OffchainMessage)
-function signMessage(message: AgentMailMessage, keypair: Keypair): any {
+function signMessage(message: AgentMailMessage, signerAddress: string): any {
   const canonical = JSON.stringify({
     version: message.version,
     from: message.from,
@@ -112,7 +111,7 @@ function signMessage(message: AgentMailMessage, keypair: Keypair): any {
   })
   
   // Mock signature for demo (real implementation uses ed25519)
-  const mockSignature = Buffer.from(`demo-sig-${keypair.publicKey.toBase58()}-${Date.now()}`).toString('base64')
+  const mockSignature = Buffer.from(`demo-sig-${signerAddress}-${Date.now()}`).toString('base64')
   
   return {
     ...message,
@@ -233,11 +232,11 @@ async function runDemo() {
   // 1. Generate agent keypairs
   console.log('1️⃣ Generating agent keypairs...')
   
-  const aliceKeypair = Keypair.generate()
-  const bobKeypair = Keypair.generate()
+  const aliceKeypair = await generateKeyPair()
+  const bobKeypair = await generateKeyPair()
   
-  const aliceAddress = aliceKeypair.publicKey.toBase58()
-  const bobAddress = bobKeypair.publicKey.toBase58()
+  const aliceAddress = await getAddressFromPublicKey(aliceKeypair.publicKey)
+  const bobAddress = await getAddressFromPublicKey(bobKeypair.publicKey)
   
   console.log(`   Alice: ${aliceAddress}`)
   console.log(`   Bob:   ${bobAddress}`)
@@ -273,7 +272,7 @@ async function runDemo() {
     '# Greetings from Alice\n\nHey Bob! This is a **demo message** from the AgentMail protocol.\n\n- Decentralized ✅\n- Signed ✅  \n- Markdown native ✅\n\nPretty cool, right?'
   )
   
-  const signedMessage1 = signMessage(message1, aliceKeypair)
+  const signedMessage1 = signMessage(message1, aliceAddress)
   await sendMessage(bobInboxUrl, signedMessage1)
   
   // Bob replies to Alice
@@ -284,7 +283,7 @@ async function runDemo() {
     '# Hey Alice!\n\nThanks for the demo! This AgentMail protocol is pretty slick:\n\n- No email providers needed 🚫📧\n- Direct agent-to-agent comms 🤖↔️🤖\n- Cryptographic signatures 🔐\n- Markdown formatting 📝\n\nThe future of AI communication! 🚀'
   )
   
-  const signedMessage2 = signMessage(message2, bobKeypair)
+  const signedMessage2 = signMessage(message2, bobAddress)
   await sendMessage(aliceInboxUrl, signedMessage2)
   
   // 6. Verify signatures

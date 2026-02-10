@@ -8,7 +8,7 @@ import {
     setInstructionAccountDefaultValuesVisitor,
 } from 'codama';
 
-const PINOCCHIO_COUNTER_PROGRAM_ID = 'PinocchioTemp1ate11111111111111111111111111';
+const AGENTMAIL_PROGRAM_ID = 'AMz2ybwRihFL9X4igLBtqNBEe9qqb4yUvjwNwEaPjNiX';
 const SYSTEM_PROGRAM_ID = '11111111111111111111111111111111';
 
 /**
@@ -20,7 +20,7 @@ export function setInstructionAccountDefaultValues(pinocchioCounterCodama: Codam
             // Global Constants
             {
                 account: 'pinocchioCounterProgram',
-                defaultValue: publicKeyValueNode(PINOCCHIO_COUNTER_PROGRAM_ID),
+                defaultValue: publicKeyValueNode(AGENTMAIL_PROGRAM_ID),
             },
             {
                 account: 'systemProgram',

@@ -1,8 +1,8 @@
 {
-    "name": "pinocchio-counter",
+    "name": "agentmail",
     "version": "1.0.0",
     "main": "index.js",
-    "description": "Pinocchio Counter Program",
+    "description": "AgentMail Program",
     "displayName": "Pinocchio Counter",
     "usecase": "Program Development",
     "keywords": [

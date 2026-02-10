@@ -6,7 +6,7 @@
  * via the AgentMail protocol.
  */
 
-import { Connection, PublicKey, Keypair } from '@solana/web3.js';
+import { createSolanaRpc, address, createKeyPairFromBytes, getAddressFromPublicKey, type KeyPairSigner } from '@solana/kit';
 import { createSignAndSendMessage, verifyAgentMailMessage } from '../clients/typescript/src/messaging.js';
 import { lookupAgentRegistry } from '../clients/typescript/src/registry.js';
 import fs from 'fs';
@@ -19,15 +19,16 @@ export interface AgentMailConfig {
 }
 
 export class AgentMailClient {
-  private connection: Connection;
-  private keypair: Keypair;
+  private rpc: ReturnType<typeof createSolanaRpc>;
+  private keypairBytes: Uint8Array;
+  private agentAddress: string | null = null;
   private messagesDir: string;
 
   constructor(config: AgentMailConfig) {
-    this.connection = new Connection(config.rpcUrl);
+    this.rpc = createSolanaRpc(config.rpcUrl);
     
     const keypairData = JSON.parse(fs.readFileSync(config.keypairPath, 'utf-8'));
-    this.keypair = Keypair.fromSecretKey(new Uint8Array(keypairData));
+    this.keypairBytes = new Uint8Array(keypairData);
     
     this.messagesDir = config.messagesDir || './agentmail-messages';
     if (!fs.existsSync(this.messagesDir)) {
@@ -46,8 +47,8 @@ export class AgentMailClient {
   ) {
     try {
       const result = await createSignAndSendMessage(
-        this.connection,
-        Array.from(this.keypair.secretKey),
+        this.rpc,
+        Array.from(this.keypairBytes),
         recipientPubkey,
         { subject, body, contentType }
       );
@@ -98,7 +99,7 @@ export class AgentMailClient {
    */
   async lookupAgent(pubkey: string): Promise<string | null> {
     try {
-      const registry = await lookupAgentRegistry(this.connection, new PublicKey(pubkey));
+      const registry = await lookupAgentRegistry(this.rpc, address(pubkey));
       return registry?.inbox_url || null;
     } catch (error) {
       console.error(`❌ Failed to lookup agent ${pubkey}:`, error);
@@ -125,8 +126,12 @@ export class AgentMailClient {
   /**
    * Get agent's own public key
    */
-  getPublicKey(): string {
-    return this.keypair.publicKey.toBase58();
+  async getPublicKey(): Promise<string> {
+    if (!this.agentAddress) {
+      const keyPair = await createKeyPairFromBytes(this.keypairBytes);
+      this.agentAddress = await getAddressFromPublicKey(keyPair.publicKey);
+    }
+    return this.agentAddress;
   }
 }
 
