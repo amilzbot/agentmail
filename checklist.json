@@ -15,8 +15,8 @@
         {
           "id": "setup-01",
           "description": "Scaffold project from pinocchio-counter template (create-solana-dapp)",
-          "status": "todo",
-          "notes": "npx create-solana-dapp -t solana-foundation/templates/pinocchio/pinocchio-counter"
+          "status": "done",
+          "notes": "✓ Successfully scaffolded from pinocchio-counter template. Project structure created with Rust program, TypeScript clients, and build tooling."
         },
         {
           "id": "research-01",
