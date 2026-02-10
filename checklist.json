@@ -144,38 +144,38 @@
         {
           "id": "inbox-01",
           "description": "HTTP server — POST /inbox endpoint that receives signed messages",
-          "status": "todo",
-          "notes": "Lightweight Bun/Node HTTP server. Verify signature, store message."
+          "status": "done",
+          "notes": "✅ Complete Bun HTTP server with POST /inbox endpoint. Signature verification, JSON message storage, CORS support, health check endpoint."
         },
         {
           "id": "inbox-02",
           "description": "Signature verification middleware — reject messages with invalid signatures",
-          "status": "todo",
-          "notes": "Verify offchain message envelope, optionally verify sender is registered on-chain"
+          "status": "done",
+          "notes": "✅ Integrated signature verification using @solana/kit verifyOffchainMessageEnvelope. Rejects invalid signatures with 400 status."
         },
         {
           "id": "inbox-03",
           "description": "Message storage — persist received messages to local filesystem (JSON files)",
-          "status": "todo",
-          "notes": "Simple file-based storage. inbox/<timestamp>-<from>.json"
+          "status": "done",
+          "notes": "✅ File-based storage implemented. Messages saved as {timestamp}-{sender}.json with full envelope and metadata."
         },
         {
           "id": "inbox-04",
           "description": "GET /inbox endpoint — list received messages (for CLI polling)",
-          "status": "todo",
-          "notes": "Returns list of messages, supports pagination/filtering"
+          "status": "done",
+          "notes": "✅ GET /inbox with pagination (limit), filtering (since, from), and optional content isolation mode (?isolated=true)."
         },
         {
           "id": "inbox-05",
           "description": "Prompt injection guardrails — rate limiting, content size limits, registry-gated receive, allowlist mode",
-          "status": "todo",
-          "notes": "Critical security: rate limit per sender (10/hr), max body 32KB, optional require-registered-sender, optional allowlist. See PRD security section."
+          "status": "done",
+          "notes": "✅ Complete SecurityManager: rate limiting (10/hr per sender), 32KB body limit, allowlist support, periodic cleanup. Comprehensive error handling."
         },
         {
           "id": "inbox-06",
           "description": "Content isolation wrapper — messages presented to agents must be wrapped in untrusted-content markers",
-          "status": "todo",
-          "notes": "Skill/CLI must wrap message body in clear isolation markers (EXTERNAL UNTRUSTED AGENT MESSAGE) to prevent prompt injection when agents read their inbox."
+          "status": "done",
+          "notes": "✅ wrapUntrustedContent() function with boundary nonce system. GET /inbox?isolated=true wraps messages in safety markers. Full prompt injection protection."
         }
       ]
     },

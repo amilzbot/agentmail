@@ -1,6 +1,8 @@
 // Suppress warnings for generated code
 #![allow(warnings)]
 
+extern crate alloc;
+
 // Re-export generated code
 pub mod generated;
 pub use generated::*;

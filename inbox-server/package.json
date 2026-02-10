@@ -1,0 +1,18 @@
+{
+  "name": "agentmail-inbox-server",
+  "version": "1.0.0",
+  "description": "AgentMail inbox server - receives and stores signed messages",
+  "type": "module",
+  "scripts": {
+    "start": "bun src/server.ts",
+    "dev": "bun --watch src/server.ts",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@solana/kit": "^6.0.0",
+    "@types/bun": "^1.0.0"
+  },
+  "devDependencies": {
+    "bun-types": "^1.0.0"
+  }
+}
