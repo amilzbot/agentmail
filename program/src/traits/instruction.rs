@@ -7,6 +7,7 @@ pub enum PinocchioCounterInstructionDiscriminators {
     Increment = 1,
     CloseCounter = 2,
     RegisterAgent = 3,
+    UpdateAgent = 4,
     /// 228 is the Anchor event instruction discriminator used for CPI-based event emission.
     /// Events are emitted by invoking CPI to this instruction with serialized event data.
     EmitEvent = 228,
@@ -21,6 +22,7 @@ impl TryFrom<u8> for PinocchioCounterInstructionDiscriminators {
             1 => Ok(Self::Increment),
             2 => Ok(Self::CloseCounter),
             3 => Ok(Self::RegisterAgent),
+            4 => Ok(Self::UpdateAgent),
             228 => Ok(Self::EmitEvent),
             _ => Err(ProgramError::InvalidInstructionData),
         }

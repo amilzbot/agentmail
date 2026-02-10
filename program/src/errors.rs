@@ -54,6 +54,14 @@ pub enum AgentMailProgramError {
     /// (7) Agent registry does not exist for this authority
     #[error("Agent registry does not exist for this authority")]
     RegistryDoesNotExist,
+
+    /// (8) Invalid account size for agent registry
+    #[error("Invalid account size for agent registry")]
+    InvalidAccountSize,
+
+    /// (9) Invalid account data format
+    #[error("Invalid account data format")]
+    InvalidAccountData,
 }
 
 impl From<AgentMailProgramError> for ProgramError {

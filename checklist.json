@@ -50,8 +50,8 @@
         {
           "id": "program-03",
           "description": "Implement 'update' instruction — modify name/inbox_url, authority-only",
-          "status": "todo",
-          "notes": "Only the authority (agent) can update their own registry entry"
+          "status": "done",
+          "notes": "✅ UpdateAgent instruction implemented: data parsing (name + inbox_url), authority validation, account update with timestamp. Added to entrypoint dispatch. Instruction discriminator = 4. Includes comprehensive tests and error handling."
         },
         {
           "id": "program-04",
