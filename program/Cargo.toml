@@ -1,5 +1,5 @@
 [package]
-name = "pinocchio-counter"
+name = "agentmail"
 version = { workspace = true }
 edition = { workspace = true }
 

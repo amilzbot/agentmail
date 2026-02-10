@@ -1,31 +1,21 @@
 use pinocchio::{account::AccountView, error::ProgramError};
 
-/// Discriminators for the Pinocchio Counter Program instructions.
+/// Discriminators for the AgentMail Program instructions.
 #[repr(u8)]
-pub enum PinocchioCounterInstructionDiscriminators {
-    CreateCounter = 0,
-    Increment = 1,
-    CloseCounter = 2,
+pub enum AgentMailInstructionDiscriminators {
     RegisterAgent = 3,
     UpdateAgent = 4,
     DeregisterAgent = 5,
-    /// 228 is the Anchor event instruction discriminator used for CPI-based event emission.
-    /// Events are emitted by invoking CPI to this instruction with serialized event data.
-    EmitEvent = 228,
 }
 
-impl TryFrom<u8> for PinocchioCounterInstructionDiscriminators {
+impl TryFrom<u8> for AgentMailInstructionDiscriminators {
     type Error = ProgramError;
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(Self::CreateCounter),
-            1 => Ok(Self::Increment),
-            2 => Ok(Self::CloseCounter),
             3 => Ok(Self::RegisterAgent),
             4 => Ok(Self::UpdateAgent),
             5 => Ok(Self::DeregisterAgent),
-            228 => Ok(Self::EmitEvent),
             _ => Err(ProgramError::InvalidInstructionData),
         }
     }

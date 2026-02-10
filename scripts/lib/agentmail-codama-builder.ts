@@ -5,17 +5,16 @@ import {
     setInstructionAccountDefaultValues,
     updateInstructionBumps,
 } from './updates';
-import { removeEmitInstruction } from './updates/remove-emit-instruction';
 
 /**
  * Builder for applying Codama IDL transformations before client generation.
  */
-export class PinocchioCounterCodamaBuilder {
+export class AgentMailCodamaBuilder {
     private codama: Codama;
 
-    constructor(pinocchioCounterIdl: unknown) {
+    constructor(agentmailIdl: unknown) {
         const idlJson =
-            typeof pinocchioCounterIdl === 'string' ? pinocchioCounterIdl : JSON.stringify(pinocchioCounterIdl);
+            typeof agentmailIdl === 'string' ? agentmailIdl : JSON.stringify(agentmailIdl);
         this.codama = createFromJson(idlJson);
     }
 
@@ -39,16 +38,11 @@ export class PinocchioCounterCodamaBuilder {
         return this;
     }
 
-    removeEmitInstruction(): this {
-        this.codama = removeEmitInstruction(this.codama);
-        return this;
-    }
-
     build(): Codama {
         return this.codama;
     }
 }
 
-export function createPinocchioCounterCodamaBuilder(pinocchioCounterIdl: unknown): PinocchioCounterCodamaBuilder {
-    return new PinocchioCounterCodamaBuilder(pinocchioCounterIdl);
+export function createAgentMailCodamaBuilder(agentmailIdl: unknown): AgentMailCodamaBuilder {
+    return new AgentMailCodamaBuilder(agentmailIdl);
 }

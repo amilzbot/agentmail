@@ -30,7 +30,7 @@ fn generate_idl() -> Result<(), Box<dyn std::error::Error>> {
     let project_root = Path::new(&manifest_dir).parent().unwrap();
     let idl_dir = project_root.join("idl");
     fs::create_dir_all(&idl_dir)?;
-    let idl_path = idl_dir.join("pinocchio_counter.json");
+    let idl_path = idl_dir.join("agentmail.json");
     fs::write(&idl_path, formatted_json)?;
 
     println!("cargo:warning=IDL written to: {}", idl_path.display());

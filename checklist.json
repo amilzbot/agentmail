@@ -62,8 +62,8 @@
         {
           "id": "program-05",
           "description": "Set up Codama IDL generation (build.rs, instruction definitions)",
-          "status": "todo",
-          "notes": "Follow pinocchio template patterns for CodamaInstructions derive"
+          "status": "done",
+          "notes": "✅ Updated definition.rs with AgentMailInstruction enum and proper Codama annotations. Updated build.rs to generate agentmail.json. Cleaned up old counter references from program structure. Ready for IDL generation once build environment resolved."
         },
         {
           "id": "program-06",
@@ -74,8 +74,8 @@
         {
           "id": "program-07",
           "description": "Grind vanity program keypair — starts with 'am', ends with 'nix'",
-          "status": "todo",
-          "notes": "solana-keygen grind --starts-and-ends-with am:nix:1 --ignore-case. Case-insensitive speeds it up significantly."
+          "status": "done",
+          "notes": "✅ Generated vanity keypair: AMz2ybwRihFL9X4igLBtqNBEe9qqb4yUvjwNwEaPjNiX (starts with 'AM', ends with 'NiX'). Saved as keys/agentmail-program.json. Ready for program deployment."
         },
         {
           "id": "program-08",

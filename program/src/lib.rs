@@ -1,11 +1,11 @@
-//! # Pinocchio Counter
+//! # AgentMail Program
 //!
-//! A counter Solana program demonstrating Pinocchio patterns.
+//! Decentralized agent-to-agent messaging registry on Solana.
 //!
 //! ## Features
-//! - Counter PDA per authority
-//! - Increment counter functionality
-//! - Event emission via CPI
+//! - Agent registry PDA per authority
+//! - Register/update/deregister agent endpoints
+//! - Name and inbox URL storage
 //!
 //! ## Architecture
 //! Built with Pinocchio (no_std). Clients auto-generated via Codama.
