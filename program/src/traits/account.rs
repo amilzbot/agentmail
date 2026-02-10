@@ -71,12 +71,6 @@ pub trait AccountDeserialize: AccountSize {
     }
 }
 
-/// Account discriminator values for this program
-#[repr(u8)]
-pub enum PinocchioCounterAccountDiscriminators {
-    CounterDiscriminator = 0,
-}
-
 /// AgentMail account discriminator values
 #[repr(u8)]
 pub enum AgentMailAccountDiscriminators {

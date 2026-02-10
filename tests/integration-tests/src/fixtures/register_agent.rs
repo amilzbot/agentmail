@@ -1,8 +1,8 @@
+use agentmail_client::AGENTMAIL_ID;
 use solana_sdk::{
     instruction::{AccountMeta, Instruction},
     pubkey::Pubkey,
 };
-use agentmail_client::AGENTMAIL_ID;
 
 const SYSTEM_PROGRAM_ID: Pubkey = Pubkey::from_str_const("11111111111111111111111111111112");
 
@@ -16,15 +16,15 @@ pub fn register_agent(
 ) -> Instruction {
     // RegisterAgent instruction discriminator is 3
     let mut data = vec![3u8];
-    
+
     // Add bump
     data.push(bump);
-    
+
     // Add name (length-prefixed string)
     let name_bytes = name.as_bytes();
     data.extend_from_slice(&(name_bytes.len() as u32).to_le_bytes());
     data.extend_from_slice(name_bytes);
-    
+
     // Add inbox_url (length-prefixed string)
     let inbox_url_bytes = inbox_url.as_bytes();
     data.extend_from_slice(&(inbox_url_bytes.len() as u32).to_le_bytes());
@@ -52,7 +52,7 @@ mod tests {
         let payer = Pubkey::new_unique();
         let agent_authority = Pubkey::new_unique();
         let agent_registry = Pubkey::new_unique();
-        
+
         let instruction = register_agent(
             &payer,
             &agent_authority,
@@ -64,19 +64,19 @@ mod tests {
 
         // Check discriminator
         assert_eq!(instruction.data[0], 3);
-        
+
         // Check bump
         assert_eq!(instruction.data[1], 255);
-        
+
         // Check name serialization (length + data)
         let name_len = u32::from_le_bytes([
             instruction.data[2],
-            instruction.data[3], 
+            instruction.data[3],
             instruction.data[4],
             instruction.data[5],
         ]);
         assert_eq!(name_len, 10);
-        
+
         let name_bytes = &instruction.data[6..16];
         assert_eq!(name_bytes, b"test_agent");
     }

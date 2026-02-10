@@ -1,7 +1,7 @@
 use pinocchio::{account::AccountView, entrypoint, error::ProgramError, Address, ProgramResult};
 
 use crate::{
-    instructions::{process_register_agent, process_update_agent, process_deregister_agent},
+    instructions::{process_deregister_agent, process_register_agent, process_update_agent},
     traits::AgentMailInstructionDiscriminators,
 };
 

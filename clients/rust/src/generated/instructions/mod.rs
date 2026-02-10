@@ -5,11 +5,10 @@
 //! <https://github.com/codama-idl/codama>
 //!
 
-  pub(crate) mod r#deregister_agent;
-  pub(crate) mod r#register_agent;
-  pub(crate) mod r#update_agent;
+pub(crate) mod r#deregister_agent;
+pub(crate) mod r#register_agent;
+pub(crate) mod r#update_agent;
 
-  pub use self::r#deregister_agent::*;
-  pub use self::r#register_agent::*;
-  pub use self::r#update_agent::*;
-
+pub use self::r#deregister_agent::*;
+pub use self::r#register_agent::*;
+pub use self::r#update_agent::*;

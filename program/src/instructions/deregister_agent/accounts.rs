@@ -52,9 +52,9 @@ impl<'a> InstructionAccounts<'a> for DeregisterAgentAccounts<'a> {}
 #[cfg(disabled_unit_tests)]
 mod tests {
     use super::*;
-    use pinocchio::{Address, error::ProgramError};
     use core::ptr;
-    
+    use pinocchio::{error::ProgramError, Address};
+
     fn create_mock_account(
         _address: Address,
         _owner: Address,
@@ -73,21 +73,21 @@ mod tests {
             Address::new_from_array([11u8; 32]),
             1000000,
             0,
-            true,  // signer
-            true,  // writable (will receive rent)
+            true, // signer
+            true, // writable (will receive rent)
         );
 
         let agent_registry = create_mock_account(
             Address::new_from_array([2u8; 32]),
             crate::ID, // Our program owns this account
-            5000000, // Some rent stored
-            384, // Size of AgentRegistry
-            false, // not signer
-            true,  // writable (will be closed)
+            5000000,   // Some rent stored
+            384,       // Size of AgentRegistry
+            false,     // not signer
+            true,      // writable (will be closed)
         );
 
         let program = create_mock_account(
-            crate::ID, // Our program ID from declare_id!
+            crate::ID,                          // Our program ID from declare_id!
             Address::new_from_array([0u8; 32]), // Native loader
             1,
             0,
@@ -97,7 +97,7 @@ mod tests {
 
         let accounts = [agent_authority, agent_registry, program];
         let result = DeregisterAgentAccounts::try_from(&accounts[..]);
-        
+
         assert!(result.is_ok());
     }
 
@@ -139,7 +139,7 @@ mod tests {
 
         let accounts = [agent_authority, agent_registry, program];
         let result = DeregisterAgentAccounts::try_from(&accounts[..]);
-        
+
         assert!(result.is_err());
     }
 
@@ -174,7 +174,7 @@ mod tests {
 
         let accounts = [agent_authority, agent_registry, program];
         let result = DeregisterAgentAccounts::try_from(&accounts[..]);
-        
+
         assert!(result.is_err());
     }
 
@@ -209,7 +209,7 @@ mod tests {
 
         let accounts = [agent_authority, agent_registry, program];
         let result = DeregisterAgentAccounts::try_from(&accounts[..]);
-        
+
         assert!(result.is_err());
     }
 }

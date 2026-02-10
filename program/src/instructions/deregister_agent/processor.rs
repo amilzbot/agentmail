@@ -1,10 +1,10 @@
 use pinocchio::{account::AccountView, Address, ProgramResult};
 
 use crate::{
+    errors::AgentMailProgramError,
     instructions::DeregisterAgent,
     state::AgentRegistry,
     traits::{AccountDeserialize, AccountSize, Instruction},
-    errors::AgentMailProgramError,
 };
 
 /// Processes the DeregisterAgent instruction.
@@ -27,10 +27,10 @@ pub fn process_deregister_agent(
     let registry_data = ix.accounts.agent_registry.try_borrow()?;
     let registry = AgentRegistry::from_bytes(&registry_data)
         .map_err(|_| AgentMailProgramError::InvalidAccountData)?;
-    
+
     // Verify that the signer is the authority for this registry
     registry.validate_authority(ix.accounts.agent_authority.address())?;
-    
+
     // Release the borrow before we modify account data
     drop(registry_data);
 
@@ -49,13 +49,13 @@ pub fn process_deregister_agent(
 mod tests {
     use super::*;
     use crate::{
-        instructions::{DeregisterAgentData, DeregisterAgentAccounts},
+        instructions::{DeregisterAgentAccounts, DeregisterAgentData},
         state::AgentRegistry,
         traits::AccountSerialize,
     };
-    use pinocchio::{Address, AccountView};
     use alloc::vec::Vec;
     use core::ptr;
+    use pinocchio::{AccountView, Address};
 
     fn create_mock_account_with_data_and_lamports(
         address: Address,
@@ -76,7 +76,8 @@ mod tests {
             "test-agent",
             "https://test.example.com/inbox",
             1707523200,
-        ).unwrap()
+        )
+        .unwrap()
     }
 
     #[test]
@@ -127,13 +128,15 @@ mod tests {
 
         // This test would need a proper Solana runtime environment to fully work
         // For now, we're validating the data parsing and authority validation
-        
+
         // Verify the registry can be deserialized
         let registry_data = accounts[1].try_borrow().unwrap();
         let parsed_registry = AgentRegistry::from_bytes(&registry_data).unwrap();
-        
+
         // Verify authority validation would pass
-        assert!(parsed_registry.validate_authority(&authority_address).is_ok());
+        assert!(parsed_registry
+            .validate_authority(&authority_address)
+            .is_ok());
     }
 
     #[test]

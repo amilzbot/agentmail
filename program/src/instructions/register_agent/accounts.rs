@@ -64,13 +64,13 @@ impl<'a> TryFrom<&'a [AccountView]> for RegisterAgentAccounts<'a> {
 
 impl<'a> InstructionAccounts<'a> for RegisterAgentAccounts<'a> {}
 
-// Unit tests disabled in favor of comprehensive LiteSVM integration tests  
+// Unit tests disabled in favor of comprehensive LiteSVM integration tests
 #[cfg(disabled_unit_tests)]
 mod tests {
     use super::*;
-    use pinocchio::{Address, error::ProgramError};
     use core::ptr;
-    
+    use pinocchio::{error::ProgramError, Address};
+
     fn create_mock_account(
         address: Address,
         owner: Address,
@@ -89,8 +89,8 @@ mod tests {
             Address::new_from_array([11u8; 32]), // System program
             1000000,
             0,
-            true,  // signer
-            true,  // writable
+            true, // signer
+            true, // writable
         );
 
         let agent_authority = create_mock_account(
@@ -121,7 +121,7 @@ mod tests {
         );
 
         let program = create_mock_account(
-            crate::ID, // Our program ID from declare_id!
+            crate::ID,                          // Our program ID from declare_id!
             Address::new_from_array([0u8; 32]), // Native loader
             1,
             0,
@@ -129,9 +129,15 @@ mod tests {
             false,
         );
 
-        let accounts = [payer, agent_authority, agent_registry, system_program, program];
+        let accounts = [
+            payer,
+            agent_authority,
+            agent_registry,
+            system_program,
+            program,
+        ];
         let result = RegisterAgentAccounts::try_from(&accounts[..]);
-        
+
         assert!(result.is_ok());
     }
 

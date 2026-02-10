@@ -34,8 +34,8 @@ impl<'a> From<(DeregisterAgentAccounts<'a>, DeregisterAgentData)> for Deregister
 #[cfg(disabled_unit_tests)]
 mod tests {
     use super::*;
-    use pinocchio::{Address, AccountView};
     use core::ptr;
+    use pinocchio::{AccountView, Address};
 
     fn create_mock_account(
         address: Address,
@@ -72,14 +72,17 @@ mod tests {
         let data = DeregisterAgentData;
 
         let instruction = DeregisterAgent::from((accounts, data));
-        
+
         // Just verify the instruction was created successfully
-        assert_eq!(instruction.accounts().agent_authority.address(), &Address::new_from_array([1u8; 32]));
+        assert_eq!(
+            instruction.accounts().agent_authority.address(),
+            &Address::new_from_array([1u8; 32])
+        );
     }
 
     #[test]
     fn test_deregister_agent_instruction_parse() {
-        let data_bytes = [];  // Empty data for deregister
+        let data_bytes = []; // Empty data for deregister
 
         let accounts = [
             create_mock_account(
@@ -88,24 +91,17 @@ mod tests {
                 true,
                 true,
             ),
-            create_mock_account(
-                Address::new_from_array([2u8; 32]),
-                crate::ID,
-                false,
-                true,
-            ),
-            create_mock_account(
-                crate::ID,
-                Address::new_from_array([0u8; 32]),
-                false,
-                false,
-            ),
+            create_mock_account(Address::new_from_array([2u8; 32]), crate::ID, false, true),
+            create_mock_account(crate::ID, Address::new_from_array([0u8; 32]), false, false),
         ];
 
         let result = DeregisterAgent::parse(&data_bytes, &accounts);
         assert!(result.is_ok());
-        
+
         let instruction = result.unwrap();
-        assert_eq!(instruction.accounts().agent_authority.address(), &Address::new_from_array([1u8; 32]));
+        assert_eq!(
+            instruction.accounts().agent_authority.address(),
+            &Address::new_from_array([1u8; 32])
+        );
     }
 }

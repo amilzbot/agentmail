@@ -5,7 +5,6 @@
 //! <https://github.com/codama-idl/codama>
 //!
 
-  pub(crate) mod r#agent_registry;
+pub(crate) mod r#agent_registry;
 
-  pub use self::r#agent_registry::*;
-
+pub use self::r#agent_registry::*;

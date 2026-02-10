@@ -47,12 +47,12 @@ impl<'a> TryFrom<&'a [AccountView]> for UpdateAgentAccounts<'a> {
 impl<'a> InstructionAccounts<'a> for UpdateAgentAccounts<'a> {}
 
 // Unit tests disabled in favor of comprehensive LiteSVM integration tests
-#[cfg(disabled_unit_tests)] 
+#[cfg(disabled_unit_tests)]
 mod tests {
     use super::*;
-    use pinocchio::{Address, error::ProgramError};
     use core::ptr;
-    
+    use pinocchio::{error::ProgramError, Address};
+
     fn create_mock_account(
         address: Address,
         owner: Address,
@@ -79,13 +79,13 @@ mod tests {
             Address::new_from_array([2u8; 32]),
             crate::ID, // Our program owns this account
             0,
-            384, // Size of AgentRegistry
+            384,   // Size of AgentRegistry
             false, // not signer
             true,  // writable
         );
 
         let program = create_mock_account(
-            crate::ID, // Our program ID from declare_id!
+            crate::ID,                          // Our program ID from declare_id!
             Address::new_from_array([0u8; 32]), // Native loader
             1,
             0,
@@ -95,7 +95,7 @@ mod tests {
 
         let accounts = [agent_authority, agent_registry, program];
         let result = UpdateAgentAccounts::try_from(&accounts[..]);
-        
+
         assert!(result.is_ok());
     }
 
@@ -137,7 +137,7 @@ mod tests {
 
         let accounts = [agent_authority, agent_registry, program];
         let result = UpdateAgentAccounts::try_from(&accounts[..]);
-        
+
         assert!(result.is_err());
     }
 
@@ -172,7 +172,7 @@ mod tests {
 
         let accounts = [agent_authority, agent_registry, program];
         let result = UpdateAgentAccounts::try_from(&accounts[..]);
-        
+
         assert!(result.is_err());
     }
 }

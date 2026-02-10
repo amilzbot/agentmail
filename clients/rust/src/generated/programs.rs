@@ -7,7 +7,5 @@
 
 use solana_pubkey::{pubkey, Pubkey};
 
-
-  /// `agentmail` program ID.
-  pub const AGENTMAIL_ID: Pubkey = pubkey!("AMz2ybwRihFL9X4igLBtqNBEe9qqb4yUvjwNwEaPjNiX");
-
+/// `agentmail` program ID.
+pub const AGENTMAIL_ID: Pubkey = pubkey!("AMz2ybwRihFL9X4igLBtqNBEe9qqb4yUvjwNwEaPjNiX");

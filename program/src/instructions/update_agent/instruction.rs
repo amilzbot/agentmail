@@ -34,10 +34,10 @@ impl<'a> From<(UpdateAgentAccounts<'a>, UpdateAgentData)> for UpdateAgent<'a> {
 #[cfg(disabled_unit_tests)]
 mod tests {
     use super::*;
-    use pinocchio::{Address, AccountView};
     use alloc::string::ToString;
     use alloc::vec::Vec;
     use core::ptr;
+    use pinocchio::{AccountView, Address};
 
     fn create_mock_account(
         address: Address,
@@ -77,9 +77,12 @@ mod tests {
         };
 
         let instruction = UpdateAgent::from((accounts, data));
-        
+
         assert_eq!(instruction.data().name, "updated-nix");
-        assert_eq!(instruction.data().inbox_url, "https://updated.example.com/inbox");
+        assert_eq!(
+            instruction.data().inbox_url,
+            "https://updated.example.com/inbox"
+        );
     }
 
     #[test]
@@ -88,12 +91,12 @@ mod tests {
             let mut bytes = Vec::new();
             let name = "test-agent";
             let url = "https://test.com/inbox";
-            
+
             bytes.extend_from_slice(&(name.len() as u32).to_le_bytes());
             bytes.extend_from_slice(name.as_bytes());
             bytes.extend_from_slice(&(url.len() as u32).to_le_bytes());
             bytes.extend_from_slice(url.as_bytes());
-            
+
             bytes
         };
 
@@ -104,23 +107,13 @@ mod tests {
                 true,
                 false,
             ),
-            create_mock_account(
-                Address::new_from_array([2u8; 32]),
-                crate::ID,
-                false,
-                true,
-            ),
-            create_mock_account(
-                crate::ID,
-                Address::new_from_array([0u8; 32]),
-                false,
-                false,
-            ),
+            create_mock_account(Address::new_from_array([2u8; 32]), crate::ID, false, true),
+            create_mock_account(crate::ID, Address::new_from_array([0u8; 32]), false, false),
         ];
 
         let result = UpdateAgent::parse(&data_bytes, &accounts);
         assert!(result.is_ok());
-        
+
         let instruction = result.unwrap();
         assert_eq!(instruction.data().name, "test-agent");
         assert_eq!(instruction.data().inbox_url, "https://test.com/inbox");

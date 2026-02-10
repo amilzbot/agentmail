@@ -20,7 +20,6 @@ pub mod errors;
 pub mod traits;
 pub mod utils;
 
-pub mod events;
 pub mod instructions;
 pub mod state;
 

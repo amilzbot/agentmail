@@ -1,7 +1,7 @@
 use alloc::string::String;
 use pinocchio::error::ProgramError;
 
-use crate::{require_len, traits::InstructionData, errors::AgentMailProgramError};
+use crate::{errors::AgentMailProgramError, require_len, traits::InstructionData};
 
 /// Instruction data for UpdateAgent
 ///
@@ -70,10 +70,7 @@ impl<'a> TryFrom<&'a [u8]> for UpdateAgentData {
         let inbox_url = String::from_utf8(url_bytes.to_vec())
             .map_err(|_| AgentMailProgramError::InvalidUtf8)?;
 
-        Ok(Self {
-            name,
-            inbox_url,
-        })
+        Ok(Self { name, inbox_url })
     }
 }
 
@@ -84,20 +81,20 @@ impl<'a> InstructionData<'a> for UpdateAgentData {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use alloc::vec::Vec;
     use alloc::borrow::ToOwned;
+    use alloc::vec::Vec;
 
     fn create_test_data(name: &str, url: &str) -> Vec<u8> {
         let mut data = Vec::new();
-        
+
         let name_bytes = name.as_bytes();
         data.extend_from_slice(&(name_bytes.len() as u32).to_le_bytes());
         data.extend_from_slice(name_bytes);
-        
+
         let url_bytes = url.as_bytes();
         data.extend_from_slice(&(url_bytes.len() as u32).to_le_bytes());
         data.extend_from_slice(url_bytes);
-        
+
         data
     }
 
@@ -105,7 +102,7 @@ mod tests {
     fn test_update_agent_data_try_from_valid() {
         let data = create_test_data("updated-agent", "https://updated.example.com/inbox");
         let result = UpdateAgentData::try_from(&data[..]);
-        
+
         assert!(result.is_ok());
         let update_data = result.unwrap();
         assert_eq!(update_data.name, "updated-agent");
@@ -151,7 +148,7 @@ mod tests {
     fn test_update_agent_data_minimum_data() {
         let data = create_test_data("", "");
         let result = UpdateAgentData::try_from(&data[..]);
-        
+
         assert!(result.is_ok());
         let update_data = result.unwrap();
         assert_eq!(update_data.name, "");

@@ -15,7 +15,6 @@ idl = []
 
 [dependencies]
 codama = { workspace = true }
-const-crypto = { workspace = true }
 pinocchio = { workspace = true, features = ["cpi", "copy"] }
 solana-address = { workspace = true }
 pinocchio-log = { workspace = true }

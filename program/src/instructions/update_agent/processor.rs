@@ -1,11 +1,11 @@
 use pinocchio::{account::AccountView, Address, ProgramResult};
 
 use crate::{
+    errors::AgentMailProgramError,
     instructions::UpdateAgent,
     state::AgentRegistry,
     traits::{AccountDeserialize, AccountSerialize, AccountSize, Instruction},
     utils::get_current_timestamp,
-    errors::AgentMailProgramError,
 };
 
 /// Processes the UpdateAgent instruction.
@@ -30,8 +30,9 @@ pub fn process_update_agent(
     // Deserialize existing registry state
     let registry_data = ix.accounts.agent_registry.try_borrow()?;
     let mut registry = AgentRegistry::from_bytes(&registry_data)
-        .map_err(|_| AgentMailProgramError::InvalidAccountData)?.clone();
-    
+        .map_err(|_| AgentMailProgramError::InvalidAccountData)?
+        .clone();
+
     // Release the borrow before we try to mutably borrow for writing
     drop(registry_data);
 
@@ -41,7 +42,7 @@ pub fn process_update_agent(
     // Update the registry fields
     registry.set_name(&ix.data.name)?;
     registry.set_inbox_url(&ix.data.inbox_url)?;
-    
+
     // Update the timestamp
     registry.touch(timestamp);
 
@@ -57,14 +58,14 @@ pub fn process_update_agent(
 mod tests {
     use super::*;
     use crate::{
-        instructions::{UpdateAgentData, UpdateAgentAccounts},
+        instructions::{UpdateAgentAccounts, UpdateAgentData},
         state::AgentRegistry,
         traits::AccountSerialize,
     };
-    use pinocchio::{Address, AccountView};
-    use alloc::vec::Vec;
     use alloc::string::ToString;
+    use alloc::vec::Vec;
     use core::ptr;
+    use pinocchio::{AccountView, Address};
 
     fn create_mock_account_with_data(
         address: Address,
@@ -84,7 +85,8 @@ mod tests {
             "original-name",
             "https://original.example.com/inbox",
             1707523200,
-        ).unwrap()
+        )
+        .unwrap()
     }
 
     #[test]
@@ -145,21 +147,21 @@ mod tests {
     #[test]
     fn test_update_agent_data_serialization() {
         let mut data = Vec::new();
-        
+
         let name = "test-update";
         let url = "https://test-update.example.com/inbox";
-        
+
         // Serialize name
         data.extend_from_slice(&(name.len() as u32).to_le_bytes());
         data.extend_from_slice(name.as_bytes());
-        
+
         // Serialize URL
         data.extend_from_slice(&(url.len() as u32).to_le_bytes());
         data.extend_from_slice(url.as_bytes());
 
         let result = UpdateAgentData::try_from(&data[..]);
         assert!(result.is_ok());
-        
+
         let update_data = result.unwrap();
         assert_eq!(update_data.name, name);
         assert_eq!(update_data.inbox_url, url);
@@ -173,12 +175,17 @@ mod tests {
 
         // Update fields
         registry.set_name("new-name").unwrap();
-        registry.set_inbox_url("https://new.example.com/inbox").unwrap();
+        registry
+            .set_inbox_url("https://new.example.com/inbox")
+            .unwrap();
         registry.touch(1707523300);
 
         // Verify updates
         assert_eq!(registry.get_name().unwrap(), "new-name");
-        assert_eq!(registry.get_inbox_url().unwrap(), "https://new.example.com/inbox");
+        assert_eq!(
+            registry.get_inbox_url().unwrap(),
+            "https://new.example.com/inbox"
+        );
         assert_eq!(registry.created_at, original_created_at); // Should not change
         assert_ne!(registry.updated_at, original_updated_at); // Should change
         assert_eq!(registry.updated_at, 1707523300);

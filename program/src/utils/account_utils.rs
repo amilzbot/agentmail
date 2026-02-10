@@ -1,6 +1,6 @@
 //! Account validation utilities.
 
-use crate::ID as PINOCCHIO_COUNTER_PROGRAM_ID;
+use crate::ID as AGENTMAIL_PROGRAM_ID;
 use pinocchio::{account::AccountView, address::Address, error::ProgramError};
 
 /// Verify account is writable, returning an error if it is not.
@@ -86,7 +86,7 @@ pub fn verify_system_account(account: &AccountView) -> Result<(), ProgramError> 
 /// * `Result<(), ProgramError>` - The result of the operation
 #[inline(always)]
 pub fn verify_current_program_account(account: &AccountView) -> Result<(), ProgramError> {
-    verify_owned_by(account, &PINOCCHIO_COUNTER_PROGRAM_ID)
+    verify_owned_by(account, &AGENTMAIL_PROGRAM_ID)
 }
 
 /// Verify account data is empty, returning an error if it is not.

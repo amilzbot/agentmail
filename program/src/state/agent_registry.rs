@@ -6,8 +6,8 @@ use pinocchio::{account::AccountView, cpi::Seed, error::ProgramError, Address};
 use crate::assert_no_padding;
 use crate::errors::AgentMailProgramError;
 use crate::traits::{
-    AccountDeserialize, AccountSerialize, AccountSize, Discriminator, PdaSeeds,
-    AgentMailAccountDiscriminators, Versioned,
+    AccountDeserialize, AccountSerialize, AccountSize, AgentMailAccountDiscriminators,
+    Discriminator, PdaSeeds, Versioned,
 };
 
 /// Agent registry account state
@@ -34,8 +34,8 @@ pub struct AgentRegistry {
     pub version: u8,
     pub _padding: [u8; 6],
     pub authority: Address,
-    pub name: [u8; 68],        // 4 bytes length + 64 bytes data
-    pub inbox_url: [u8; 260],  // 4 bytes length + 256 bytes data
+    pub name: [u8; 68],       // 4 bytes length + 64 bytes data
+    pub inbox_url: [u8; 260], // 4 bytes length + 256 bytes data
     pub created_at: i64,
     pub updated_at: i64,
 }
@@ -93,7 +93,7 @@ impl PdaSeeds for AgentRegistry {
 impl AgentRegistry {
     /// Maximum length for agent name (UTF-8 bytes)
     pub const MAX_NAME_LEN: usize = 64;
-    
+
     /// Maximum length for inbox URL (UTF-8 bytes)
     pub const MAX_INBOX_URL_LEN: usize = 256;
 
@@ -148,21 +148,21 @@ impl AgentRegistry {
     #[inline(always)]
     pub fn set_name(&mut self, name: &str) -> Result<(), ProgramError> {
         let name_bytes = name.as_bytes();
-        
+
         if name_bytes.len() > Self::MAX_NAME_LEN {
             return Err(AgentMailProgramError::NameTooLong.into());
         }
 
         // Clear the name field
         self.name = [0u8; 68];
-        
+
         // Set length prefix (4 bytes, little-endian)
         let len_bytes = (name_bytes.len() as u32).to_le_bytes();
         self.name[..4].copy_from_slice(&len_bytes);
-        
+
         // Copy name data
         self.name[4..4 + name_bytes.len()].copy_from_slice(name_bytes);
-        
+
         Ok(())
     }
 
@@ -170,29 +170,30 @@ impl AgentRegistry {
     #[inline(always)]
     pub fn set_inbox_url(&mut self, inbox_url: &str) -> Result<(), ProgramError> {
         let url_bytes = inbox_url.as_bytes();
-        
+
         if url_bytes.len() > Self::MAX_INBOX_URL_LEN {
             return Err(AgentMailProgramError::InboxUrlTooLong.into());
         }
 
         // Clear the inbox_url field
         self.inbox_url = [0u8; 260];
-        
+
         // Set length prefix (4 bytes, little-endian)
         let len_bytes = (url_bytes.len() as u32).to_le_bytes();
         self.inbox_url[..4].copy_from_slice(&len_bytes);
-        
+
         // Copy URL data
         self.inbox_url[4..4 + url_bytes.len()].copy_from_slice(url_bytes);
-        
+
         Ok(())
     }
 
     /// Get the agent's name as a string
     #[inline(always)]
     pub fn get_name(&self) -> Result<alloc::string::String, ProgramError> {
-        let len = u32::from_le_bytes([self.name[0], self.name[1], self.name[2], self.name[3]]) as usize;
-        
+        let len =
+            u32::from_le_bytes([self.name[0], self.name[1], self.name[2], self.name[3]]) as usize;
+
         if len > Self::MAX_NAME_LEN {
             return Err(AgentMailProgramError::InvalidNameLength.into());
         }
@@ -205,8 +206,13 @@ impl AgentRegistry {
     /// Get the agent's inbox URL as a string
     #[inline(always)]
     pub fn get_inbox_url(&self) -> Result<alloc::string::String, ProgramError> {
-        let len = u32::from_le_bytes([self.inbox_url[0], self.inbox_url[1], self.inbox_url[2], self.inbox_url[3]]) as usize;
-        
+        let len = u32::from_le_bytes([
+            self.inbox_url[0],
+            self.inbox_url[1],
+            self.inbox_url[2],
+            self.inbox_url[3],
+        ]) as usize;
+
         if len > Self::MAX_INBOX_URL_LEN {
             return Err(AgentMailProgramError::InvalidInboxUrlLength.into());
         }
@@ -237,7 +243,8 @@ mod tests {
             "nix",
             "https://nix.example.com/inbox",
             1707523200, // 2026-02-10 timestamp
-        ).unwrap()
+        )
+        .unwrap()
     }
 
     #[test]
@@ -249,7 +256,8 @@ mod tests {
             "test-agent",
             "https://test.example.com/inbox",
             1707523200,
-        ).unwrap();
+        )
+        .unwrap();
 
         assert_eq!(registry.bump, 200);
         assert_eq!(registry.version, 1);
@@ -257,7 +265,10 @@ mod tests {
         assert_eq!(registry.created_at, 1707523200);
         assert_eq!(registry.updated_at, 1707523200);
         assert_eq!(registry.get_name().unwrap(), "test-agent".to_string());
-        assert_eq!(registry.get_inbox_url().unwrap(), "https://test.example.com/inbox".to_string());
+        assert_eq!(
+            registry.get_inbox_url().unwrap(),
+            "https://test.example.com/inbox".to_string()
+        );
     }
 
     #[test]
@@ -274,17 +285,14 @@ mod tests {
         let invalid_authority = Address::new_from_array([99u8; 32]);
 
         let result = registry.validate_authority(&invalid_authority);
-        assert_eq!(
-            result,
-            Err(AgentMailProgramError::InvalidAuthority.into())
-        );
+        assert_eq!(result, Err(AgentMailProgramError::InvalidAuthority.into()));
     }
 
     #[test]
     fn test_agent_registry_name_too_long() {
         let authority = Address::new_from_array([1u8; 32]);
         let long_name = "a".repeat(65); // Exceeds MAX_NAME_LEN
-        
+
         let result = AgentRegistry::new(
             200,
             authority,
@@ -292,7 +300,7 @@ mod tests {
             "https://test.example.com/inbox",
             1707523200,
         );
-        
+
         assert_eq!(result, Err(AgentMailProgramError::NameTooLong.into()));
     }
 
@@ -300,15 +308,9 @@ mod tests {
     fn test_agent_registry_inbox_url_too_long() {
         let authority = Address::new_from_array([1u8; 32]);
         let long_url = "https://".to_string() + &"a".repeat(250); // Exceeds MAX_INBOX_URL_LEN
-        
-        let result = AgentRegistry::new(
-            200,
-            authority,
-            "test",
-            &long_url,
-            1707523200,
-        );
-        
+
+        let result = AgentRegistry::new(200, authority, "test", &long_url, 1707523200);
+
         assert_eq!(result, Err(AgentMailProgramError::InboxUrlTooLong.into()));
     }
 
@@ -322,8 +324,13 @@ mod tests {
         assert_eq!(registry.get_name().unwrap(), "new-name".to_string());
 
         // Update inbox URL
-        registry.set_inbox_url("https://new.example.com/inbox").unwrap();
-        assert_eq!(registry.get_inbox_url().unwrap(), "https://new.example.com/inbox".to_string());
+        registry
+            .set_inbox_url("https://new.example.com/inbox")
+            .unwrap();
+        assert_eq!(
+            registry.get_inbox_url().unwrap(),
+            "https://new.example.com/inbox".to_string()
+        );
 
         // Touch timestamp
         registry.touch(1707523300);
@@ -338,7 +345,7 @@ mod tests {
 
         assert_eq!(bytes.len(), AgentRegistry::DATA_LEN);
         assert_eq!(bytes[0], 255); // bump
-        assert_eq!(bytes[1], 1);   // version
+        assert_eq!(bytes[1], 1); // version
         assert_eq!(&bytes[2..8], &[0u8; 6]); // padding
         assert_eq!(&bytes[8..40], &[1u8; 32]); // authority
     }
@@ -366,8 +373,14 @@ mod tests {
         assert_eq!(deserialized.authority, registry.authority);
         assert_eq!(deserialized.created_at, registry.created_at);
         assert_eq!(deserialized.updated_at, registry.updated_at);
-        assert_eq!(deserialized.get_name().unwrap(), registry.get_name().unwrap());
-        assert_eq!(deserialized.get_inbox_url().unwrap(), registry.get_inbox_url().unwrap());
+        assert_eq!(
+            deserialized.get_name().unwrap(),
+            registry.get_name().unwrap()
+        );
+        assert_eq!(
+            deserialized.get_inbox_url().unwrap(),
+            registry.get_inbox_url().unwrap()
+        );
     }
 
     #[test]

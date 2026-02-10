@@ -5,7 +5,6 @@
 //! <https://github.com/codama-idl/codama>
 //!
 
-      pub(crate) mod agentmail;
-  
-      pub use self::agentmail::AgentmailError;
-  
+pub(crate) mod agentmail;
+
+pub use self::agentmail::AgentmailError;

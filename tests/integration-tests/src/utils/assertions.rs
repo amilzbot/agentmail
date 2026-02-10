@@ -51,24 +51,31 @@ pub fn assert_agent_registry_account(
 
     assert_eq!(account.owner, AGENTMAIL_ID);
 
-    let registry = AgentRegistry::from_bytes(&account.data).expect("Should deserialize agent registry account");
+    let registry = AgentRegistry::from_bytes(&account.data)
+        .expect("Should deserialize agent registry account");
 
     assert_eq!(registry.authority.as_ref(), expected_authority.as_ref());
     assert_eq!(registry.bump, expected_bump);
-    
+
     // Parse name from length-prefixed string
     let name_len = u32::from_le_bytes([
-        registry.name[0], registry.name[1], registry.name[2], registry.name[3]
+        registry.name[0],
+        registry.name[1],
+        registry.name[2],
+        registry.name[3],
     ]) as usize;
-    let name_str = std::str::from_utf8(&registry.name[4..4+name_len])
-        .expect("Name should be valid UTF-8");
+    let name_str =
+        std::str::from_utf8(&registry.name[4..4 + name_len]).expect("Name should be valid UTF-8");
     assert_eq!(name_str, expected_name);
-    
+
     // Parse inbox_url from length-prefixed string
     let url_len = u32::from_le_bytes([
-        registry.inbox_url[0], registry.inbox_url[1], registry.inbox_url[2], registry.inbox_url[3]
+        registry.inbox_url[0],
+        registry.inbox_url[1],
+        registry.inbox_url[2],
+        registry.inbox_url[3],
     ]) as usize;
-    let url_str = std::str::from_utf8(&registry.inbox_url[4..4+url_len])
+    let url_str = std::str::from_utf8(&registry.inbox_url[4..4 + url_len])
         .expect("Inbox URL should be valid UTF-8");
     assert_eq!(url_str, expected_inbox_url);
 }

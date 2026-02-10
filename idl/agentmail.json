@@ -115,12 +115,6 @@
       {
         "code": 1,
         "kind": "errorNode",
-        "message": "Event authority PDA is invalid",
-        "name": "invalidEventAuthority"
-      },
-      {
-        "code": 1,
-        "kind": "errorNode",
         "message": "Agent name is too long (max 64 bytes)",
         "name": "nameTooLong"
       },
