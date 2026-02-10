@@ -31,4 +31,5 @@ out/
 
 # Logs
 logs/
-*.log
+*.logtarget/
+node_modules/
