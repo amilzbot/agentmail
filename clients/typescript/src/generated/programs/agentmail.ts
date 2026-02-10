@@ -9,7 +9,7 @@
 import { assertIsInstructionWithAccounts, containsBytes, getU8Encoder, type Address, type Instruction, type InstructionWithData, type ReadonlyUint8Array } from '@solana/kit';
 import { parseDeregisterAgentInstruction, parseRegisterAgentInstruction, parseUpdateAgentInstruction, type ParsedDeregisterAgentInstruction, type ParsedRegisterAgentInstruction, type ParsedUpdateAgentInstruction } from '../instructions';
 
-export const AGENTMAIL_PROGRAM_ADDRESS = 'PinocchioTemp1ate11111111111111111111111111' as Address<'PinocchioTemp1ate11111111111111111111111111'>;
+export const AGENTMAIL_PROGRAM_ADDRESS = 'AMz2ybwRihFL9X4igLBtqNBEe9qqb4yUvjwNwEaPjNiX' as Address<'AMz2ybwRihFL9X4igLBtqNBEe9qqb4yUvjwNwEaPjNiX'>;
 
 export enum AgentmailAccount { AgentRegistry }
 
@@ -23,7 +23,7 @@ if (containsBytes(data, getU8Encoder().encode(5), 0)) { return AgentmailInstruct
 throw new Error("The provided instruction could not be identified as a agentmail instruction.")
 }
 
-export type ParsedAgentmailInstruction<TProgram extends string = 'PinocchioTemp1ate11111111111111111111111111'> =
+export type ParsedAgentmailInstruction<TProgram extends string = 'AMz2ybwRihFL9X4igLBtqNBEe9qqb4yUvjwNwEaPjNiX'> =
 | { instructionType: AgentmailInstruction.RegisterAgent } & ParsedRegisterAgentInstruction<TProgram>
 | { instructionType: AgentmailInstruction.UpdateAgent } & ParsedUpdateAgentInstruction<TProgram>
 | { instructionType: AgentmailInstruction.DeregisterAgent } & ParsedDeregisterAgentInstruction<TProgram>
