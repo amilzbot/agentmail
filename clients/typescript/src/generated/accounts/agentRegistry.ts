@@ -10,18 +10,18 @@ import { assertAccountExists, assertAccountsExist, combineCodec, decodeAccount, 
 
 
 
-export type AgentRegistry = { discriminator: number; version: number; bump: number; version: number; padding: Array<number>; authority: Address; name: Array<number>; inboxUrl: Array<number>; createdAt: bigint; updatedAt: bigint;  };
+export type AgentRegistry = { discriminator: number; version: number; bump: number; dataVersion: number; padding: Array<number>; authority: Address; name: Array<number>; inboxUrl: Array<number>; createdAt: bigint; updatedAt: bigint;  };
 
-export type AgentRegistryArgs = { discriminator: number; version: number; bump: number; version: number; padding: Array<number>; authority: Address; name: Array<number>; inboxUrl: Array<number>; createdAt: number | bigint; updatedAt: number | bigint;  };
+export type AgentRegistryArgs = { discriminator: number; version: number; bump: number; dataVersion: number; padding: Array<number>; authority: Address; name: Array<number>; inboxUrl: Array<number>; createdAt: number | bigint; updatedAt: number | bigint;  };
 
 /** Gets the encoder for {@link AgentRegistryArgs} account data. */
 export function getAgentRegistryEncoder(): FixedSizeEncoder<AgentRegistryArgs> {
-    return getStructEncoder([['discriminator', getU8Encoder()], ['version', getU8Encoder()], ['bump', getU8Encoder()], ['version', getU8Encoder()], ['padding', getArrayEncoder(getU8Encoder(), { size: 6 })], ['authority', getAddressEncoder()], ['name', getArrayEncoder(getU8Encoder(), { size: 68 })], ['inboxUrl', getArrayEncoder(getU8Encoder(), { size: 260 })], ['createdAt', getI64Encoder()], ['updatedAt', getI64Encoder()]]);
+    return getStructEncoder([['discriminator', getU8Encoder()], ['version', getU8Encoder()], ['bump', getU8Encoder()], ['dataVersion', getU8Encoder()], ['padding', getArrayEncoder(getU8Encoder(), { size: 6 })], ['authority', getAddressEncoder()], ['name', getArrayEncoder(getU8Encoder(), { size: 68 })], ['inboxUrl', getArrayEncoder(getU8Encoder(), { size: 260 })], ['createdAt', getI64Encoder()], ['updatedAt', getI64Encoder()]]);
 }
 
 /** Gets the decoder for {@link AgentRegistry} account data. */
 export function getAgentRegistryDecoder(): FixedSizeDecoder<AgentRegistry> {
-    return getStructDecoder([['discriminator', getU8Decoder()], ['version', getU8Decoder()], ['bump', getU8Decoder()], ['version', getU8Decoder()], ['padding', getArrayDecoder(getU8Decoder(), { size: 6 })], ['authority', getAddressDecoder()], ['name', getArrayDecoder(getU8Decoder(), { size: 68 })], ['inboxUrl', getArrayDecoder(getU8Decoder(), { size: 260 })], ['createdAt', getI64Decoder()], ['updatedAt', getI64Decoder()]]);
+    return getStructDecoder([['discriminator', getU8Decoder()], ['version', getU8Decoder()], ['bump', getU8Decoder()], ['dataVersion', getU8Decoder()], ['padding', getArrayDecoder(getU8Decoder(), { size: 6 })], ['authority', getAddressDecoder()], ['name', getArrayDecoder(getU8Decoder(), { size: 68 })], ['inboxUrl', getArrayDecoder(getU8Decoder(), { size: 260 })], ['createdAt', getI64Decoder()], ['updatedAt', getI64Decoder()]]);
 }
 
 /** Gets the codec for {@link AgentRegistry} account data. */

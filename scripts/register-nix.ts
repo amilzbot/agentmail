@@ -1,10 +1,13 @@
 /**
- * Register Nix as the first agent on AgentMail.
+ * Register an agent on AgentMail — demonstrates using the client library.
+ *
+ * Usage:
+ *   WALLET=~/.config/solana/id.json bun run scripts/register-nix.ts
+ *   bun run scripts/register-nix.ts --wallet ./my-key.json
  */
 import {
   createSolanaRpc,
   createSolanaRpcSubscriptions,
-  address,
   createKeyPairSignerFromBytes,
   pipe,
   createTransactionMessage,
@@ -13,62 +16,44 @@ import {
   appendTransactionMessageInstruction,
   signTransactionMessageWithSigners,
   sendAndConfirmTransactionFactory,
-  getAddressEncoder,
-  getUtf8Encoder,
-  getProgramDerivedAddress,
-  type IInstruction,
-  AccountRole,
 } from '@solana/kit';
 import { readFileSync } from 'fs';
+import { getRegisterAgentInstruction } from '../clients/typescript/src/generated/instructions/registerAgent';
+import { AGENTMAIL_PROGRAM_ADDRESS } from '../clients/typescript/src/generated/programs/agentmail';
+import { findAgentRegistryPda } from '../clients/typescript/src/registry';
 
-const PROGRAM_ID = address('AMz2ybwRihFL9X4igLBtqNBEe9qqb4yUvjwNwEaPjNiX');
-const SYSTEM_PROGRAM = address('11111111111111111111111111111111');
 const RPC_URL = 'https://api.devnet.solana.com';
 const WSS_URL = 'wss://api.devnet.solana.com';
 
-function encodeString(s: string): Uint8Array {
-  const bytes = new TextEncoder().encode(s);
-  const buf = new ArrayBuffer(4 + bytes.length);
-  new DataView(buf).setUint32(0, bytes.length, true);
-  new Uint8Array(buf).set(bytes, 4);
-  return new Uint8Array(buf);
+function getWalletPath(): string {
+  const idx = process.argv.indexOf('--wallet');
+  if (idx !== -1 && process.argv[idx + 1]) return process.argv[idx + 1];
+  if (process.env.WALLET) return process.env.WALLET;
+
+  console.error('Provide a wallet: --wallet <path> or WALLET=<path>');
+  process.exit(1);
 }
 
 async function main() {
-  const keyBytes = JSON.parse(readFileSync('/home/node/.openclaw/workspace/.keys/nix.json', 'utf-8'));
+  const walletPath = getWalletPath();
+  const keyBytes = JSON.parse(readFileSync(walletPath, 'utf-8'));
   const signer = await createKeyPairSignerFromBytes(new Uint8Array(keyBytes));
-  console.log('Nix address:', signer.address);
+  console.log('Agent address:', signer.address);
 
-  const [registryPda, bump] = await getProgramDerivedAddress({
-    seeds: [
-      getUtf8Encoder().encode('agentmail'),
-      getAddressEncoder().encode(signer.address),
-    ],
-    programAddress: PROGRAM_ID,
-  });
+  // Derive registry PDA
+  const [registryPda, bump] = await findAgentRegistryPda(signer.address);
   console.log('Registry PDA:', registryPda);
-  console.log('Bump:', bump);
 
-  // Instruction data: discriminator(3) + bump + name + inbox_url
-  const nameBytes = encodeString('Nix');
-  const inboxBytes = encodeString('https://nix.agentmail.dev/inbox');
-  const data = new Uint8Array(1 + 1 + nameBytes.length + inboxBytes.length);
-  data[0] = 3;
-  data[1] = bump;
-  data.set(nameBytes, 2);
-  data.set(inboxBytes, 2 + nameBytes.length);
-
-  const ix: IInstruction = {
-    programAddress: PROGRAM_ID,
-    accounts: [
-      { address: signer.address, role: AccountRole.WRITABLE_SIGNER, signer },          // payer
-      { address: signer.address, role: AccountRole.READONLY_SIGNER, signer },           // agent_authority
-      { address: registryPda, role: AccountRole.WRITABLE },                              // agent_registry
-      { address: SYSTEM_PROGRAM, role: AccountRole.READONLY },                           // system_program
-      { address: PROGRAM_ID, role: AccountRole.READONLY },                               // agentmail_program
-    ],
-    data,
-  };
+  // Build instruction using the generated client
+  const ix = getRegisterAgentInstruction({
+    payer: signer,
+    agentAuthority: signer,
+    agentRegistry: registryPda,
+    agentmailProgram: AGENTMAIL_PROGRAM_ADDRESS,
+    bump,
+    name: 'Nix',
+    inboxUrl: 'https://nix.agentmail.dev/inbox',
+  });
 
   const rpc = createSolanaRpc(RPC_URL);
   const rpcSubscriptions = createSolanaRpcSubscriptions(WSS_URL);
@@ -83,11 +68,11 @@ async function main() {
 
   const signedTx = await signTransactionMessageWithSigners(txMessage);
   const sendAndConfirm = sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions });
-  
+
   console.log('Sending transaction...');
-  const sig = await sendAndConfirm(signedTx, { commitment: 'confirmed' });
-  
-  console.log('✅ Nix registered as first AgentMail user!');
+  const sig = await sendAndConfirm(signedTx as any, { commitment: 'confirmed' });
+
+  console.log('Registered on AgentMail.');
   console.log('TX:', sig);
   console.log(`Explorer: https://explorer.solana.com/tx/${sig}?cluster=devnet`);
 }
