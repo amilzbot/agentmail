@@ -104,3 +104,66 @@ pub fn test_invalid_bump<T: InstructionTestFixture>(
         .send_expect_error(ctx);
     assert_instruction_error(error, InstructionError::InvalidSeeds);
 }
+
+/// Helper struct for parsing AgentRegistry account data in tests
+#[derive(Debug, Clone, PartialEq)]
+pub struct AgentRegistryAccount {
+    pub bump: u8,
+    pub version: u8,
+    pub authority: Address,
+    pub name: String,
+    pub inbox_url: String,
+    pub created_at: i64,
+    pub updated_at: i64,
+}
+
+impl AgentRegistryAccount {
+    pub fn try_from_account_data(data: &[u8]) -> Result<Self, &'static str> {
+        if data.len() != 384 {
+            return Err("Invalid account data length");
+        }
+
+        let bump = data[0];
+        let version = data[1];
+        // Skip padding bytes 2-7
+        
+        // Authority is at offset 8, 32 bytes
+        let authority = Address::from(<[u8; 32]>::try_from(&data[8..40]).unwrap());
+        
+        // Name is at offset 40, length-prefixed (4 bytes len + up to 64 bytes data)
+        let name_len = u32::from_le_bytes([data[40], data[41], data[42], data[43]]) as usize;
+        if name_len > 64 {
+            return Err("Invalid name length");
+        }
+        let name_bytes = &data[44..44 + name_len];
+        let name = String::from_utf8(name_bytes.to_vec()).map_err(|_| "Invalid name UTF-8")?;
+        
+        // Inbox URL is at offset 108 (40 + 68), length-prefixed (4 bytes len + up to 256 bytes data)
+        let url_len = u32::from_le_bytes([data[108], data[109], data[110], data[111]]) as usize;
+        if url_len > 256 {
+            return Err("Invalid inbox_url length");
+        }
+        let url_bytes = &data[112..112 + url_len];
+        let inbox_url = String::from_utf8(url_bytes.to_vec()).map_err(|_| "Invalid inbox_url UTF-8")?;
+        
+        // Timestamps are at offset 368 and 376 (8 bytes each)
+        let created_at = i64::from_le_bytes([
+            data[368], data[369], data[370], data[371],
+            data[372], data[373], data[374], data[375],
+        ]);
+        let updated_at = i64::from_le_bytes([
+            data[376], data[377], data[378], data[379],
+            data[380], data[381], data[382], data[383],
+        ]);
+
+        Ok(Self {
+            bump,
+            version,
+            authority,
+            name,
+            inbox_url,
+            created_at,
+            updated_at,
+        })
+    }
+}

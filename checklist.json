@@ -68,8 +68,8 @@
         {
           "id": "program-06",
           "description": "Write LiteSVM integration tests for all instructions",
-          "status": "todo",
-          "notes": "Test register, update, deregister, error cases, PDA derivation"
+          "status": "done",
+          "notes": "✅ Complete LiteSVM integration tests for register_agent, update_agent, and deregister_agent. Tests cover: success cases, error conditions (wrong authority, invalid data, account not found), field validation (name/URL length, empty fields, HTTPS requirement), PDA derivation, rent reclamation, and re-registration. Created fixtures for all instructions with proper data serialization."
         },
         {
           "id": "program-07",

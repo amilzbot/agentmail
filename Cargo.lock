@@ -123,6 +123,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "agentmail"
+version = "0.0.1"
+dependencies = [
+ "codama",
+ "const-crypto",
+ "pinocchio",
+ "pinocchio-log",
+ "pinocchio-system",
+ "serde_json",
+ "solana-address 2.0.0",
+ "thiserror 2.0.18",
+]
+
+[[package]]
 name = "ahash"
 version = "0.8.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2783,20 +2797,6 @@ dependencies = [
  "solana-define-syscall 4.0.1",
  "solana-instruction-view",
  "solana-program-error",
-]
-
-[[package]]
-name = "pinocchio-counter"
-version = "0.0.1"
-dependencies = [
- "codama",
- "const-crypto",
- "pinocchio",
- "pinocchio-log",
- "pinocchio-system",
- "serde_json",
- "solana-address 2.0.0",
- "thiserror 2.0.18",
 ]
 
 [[package]]
