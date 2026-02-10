@@ -6,8 +6,8 @@ edition = { workspace = true }
 [lib]
 crate-type = ["cdylib", "lib"]
 
-[lints]
-workspace = true
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(disabled_unit_tests)'] }
 
 [features]
 no-entrypoint = []
