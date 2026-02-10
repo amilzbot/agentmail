@@ -2,16 +2,19 @@
  * AgentMail Message Signing and Verification
  * 
  * Implements message signing using @solana/kit offchain messages (sRFC 3).
+ * Uses V1 offchain messages for arbitrary-length UTF-8 content.
  */
 
 import { 
   type Address,
-  type CryptoKeyPair,
-  compileOffchainMessageEnvelope,
+  type OffchainMessageEnvelope,
+  type OffchainMessageV1,
+  type OffchainMessageSignatory,
+  compileOffchainMessageV1Envelope,
   signOffchainMessageEnvelope,
   verifyOffchainMessageEnvelope,
-  type OffchainMessageEnvelope,
-  OffchainMessageContentFormat,
+  getAddressFromPublicKey,
+  getOffchainMessageDecoder,
 } from '@solana/kit';
 
 /**
@@ -51,9 +54,6 @@ export interface SignedAgentMailMessage {
 
 /**
  * Creates an AgentMail message payload
- * 
- * @param options - Message creation options
- * @returns AgentMail message payload
  */
 export function createAgentMailMessage(options: CreateMessageOptions): AgentMailMessage {
   return {
@@ -69,31 +69,33 @@ export function createAgentMailMessage(options: CreateMessageOptions): AgentMail
 }
 
 /**
- * Signs an AgentMail message using Solana offchain messages
+ * Signs an AgentMail message using Solana offchain messages (V1).
  * 
  * @param message - The AgentMail message to sign
- * @param senderKeypair - The sender's Solana keypair
+ * @param senderKeyPair - The sender's Web Crypto CryptoKeyPair
  * @returns Signed message envelope
  */
 export async function signAgentMailMessage(
   message: AgentMailMessage,
-  senderKeypair: CryptoKeyPair
+  senderKeyPair: CryptoKeyPair
 ): Promise<SignedAgentMailMessage> {
-  // Serialize the message payload to JSON
   const messageJson = JSON.stringify(message);
   
-  // Compile the offchain message envelope
-  const envelope = await compileOffchainMessageEnvelope({
-    content: messageJson,
-    contentFormat: OffchainMessageContentFormat.UTF8_65535_BYTES_MAX,
-    address: message.from,
-  });
+  // Derive the sender's address from the public key
+  const senderAddress = await getAddressFromPublicKey(senderKeyPair.publicKey);
   
-  // Sign the envelope
-  const signedEnvelope = await signOffchainMessageEnvelope({
-    envelope,
-    keyPair: senderKeypair,
-  });
+  // Build a V1 offchain message
+  const offchainMessage: OffchainMessageV1 = {
+    version: 1 as const,
+    content: messageJson,
+    requiredSignatories: [{ address: senderAddress } as OffchainMessageSignatory],
+  };
+  
+  // Compile to an envelope (unsigned)
+  const envelope = compileOffchainMessageV1Envelope(offchainMessage);
+  
+  // Sign the envelope with the sender's key pair
+  const signedEnvelope = await signOffchainMessageEnvelope([senderKeyPair], envelope);
   
   return {
     envelope: signedEnvelope,
@@ -103,17 +105,13 @@ export async function signAgentMailMessage(
 
 /**
  * Convenience function to create and sign a message in one step
- * 
- * @param options - Message creation options  
- * @param senderKeypair - The sender's Solana keypair
- * @returns Signed message envelope
  */
 export async function createAndSignMessage(
   options: CreateMessageOptions,
-  senderKeypair: CryptoKeyPair
+  senderKeyPair: CryptoKeyPair
 ): Promise<SignedAgentMailMessage> {
   const message = createAgentMailMessage(options);
-  return signAgentMailMessage(message, senderKeypair);
+  return signAgentMailMessage(message, senderKeyPair);
 }
 
 /**
@@ -126,18 +124,29 @@ export async function verifyAgentMailMessage(
   envelope: OffchainMessageEnvelope
 ): Promise<{ valid: boolean; payload?: AgentMailMessage; error?: string }> {
   try {
-    // Verify the offchain message signature
-    const isValid = await verifyOffchainMessageEnvelope(envelope);
+    // Verify the offchain message signature (throws on failure)
+    await verifyOffchainMessageEnvelope(envelope);
     
-    if (!isValid) {
-      return { valid: false, error: 'Invalid signature' };
+    // Decode the offchain message to extract the content string
+    const decoded = getOffchainMessageDecoder().decode(envelope.content);
+    
+    // Extract the text content based on the message version
+    let contentText: string;
+    if ('content' in decoded && typeof decoded.content === 'string') {
+      // V1 message: content is a plain string
+      contentText = decoded.content;
+    } else if ('content' in decoded && typeof decoded.content === 'object' && decoded.content !== null && 'text' in decoded.content) {
+      // V0 message: content is { format, text }
+      contentText = (decoded.content as { text: string }).text;
+    } else {
+      return { valid: false, error: 'Unable to extract message content' };
     }
     
-    // Parse the message payload
+    // Parse the message payload from the content
     let payload: AgentMailMessage;
     try {
-      payload = JSON.parse(envelope.message) as AgentMailMessage;
-    } catch (error) {
+      payload = JSON.parse(contentText) as AgentMailMessage;
+    } catch {
       return { valid: false, error: 'Invalid JSON payload' };
     }
     
@@ -151,7 +160,8 @@ export async function verifyAgentMailMessage(
     }
     
     // Verify that the signer matches the 'from' field
-    if (envelope.address !== payload.from) {
+    const signerAddresses = Object.keys(envelope.signatures);
+    if (!signerAddresses.includes(payload.from)) {
       return { valid: false, error: 'Signer mismatch: envelope signer does not match message from field' };
     }
     
@@ -164,9 +174,6 @@ export async function verifyAgentMailMessage(
 
 /**
  * Serializes a signed message for transmission over HTTP
- * 
- * @param signedMessage - The signed message to serialize
- * @returns JSON string ready for HTTP transmission
  */
 export function serializeSignedMessage(signedMessage: SignedAgentMailMessage): string {
   return JSON.stringify(signedMessage.envelope);
@@ -174,9 +181,6 @@ export function serializeSignedMessage(signedMessage: SignedAgentMailMessage): s
 
 /**
  * Deserializes a received message from HTTP
- * 
- * @param data - JSON string received over HTTP
- * @returns Parsed envelope ready for verification
  */
 export function deserializeSignedMessage(data: string): OffchainMessageEnvelope {
   return JSON.parse(data) as OffchainMessageEnvelope;
@@ -188,16 +192,12 @@ export function deserializeSignedMessage(data: string): OffchainMessageEnvelope 
 export interface SendMessageResponse {
   success: boolean;
   error?: string;
-  details?: any;
+  messageId?: string;
+  details?: unknown;
 }
 
 /**
  * Sends a signed message to a recipient's inbox URL
- * 
- * @param signedMessage - The signed message to send
- * @param inboxUrl - The recipient's inbox URL
- * @param timeoutMs - Request timeout in milliseconds (default: 10000)
- * @returns Send result
  */
 export async function sendMessage(
   signedMessage: SignedAgentMailMessage,
@@ -205,7 +205,6 @@ export async function sendMessage(
   timeoutMs: number = 10000
 ): Promise<SendMessageResponse> {
   try {
-    // Validate inbox URL
     if (!inboxUrl.startsWith('https://')) {
       return { 
         success: false, 
@@ -213,10 +212,7 @@ export async function sendMessage(
       };
     }
 
-    // Serialize the message for transmission
     const messageData = serializeSignedMessage(signedMessage);
-
-    // Create fetch request with timeout
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -242,8 +238,7 @@ export async function sendMessage(
         };
       }
 
-      // Try to parse response body
-      let responseData: any = null;
+      let responseData: unknown = null;
       try {
         const responseText = await response.text();
         if (responseText) {
@@ -284,27 +279,17 @@ export async function sendMessage(
 
 /**
  * Convenience function to create, sign, and send a message
- * 
- * @param options - Message creation options
- * @param senderKeypair - The sender's Solana keypair
- * @param inboxUrl - The recipient's inbox URL
- * @param timeoutMs - Request timeout in milliseconds (default: 10000)
- * @returns Send result with message details
  */
 export async function createSignAndSendMessage(
   options: CreateMessageOptions,
-  senderKeypair: CryptoKeyPair,
+  senderKeyPair: CryptoKeyPair,
   inboxUrl: string,
   timeoutMs: number = 10000
-): Promise<SendMessageResponse & { messageId?: string }> {
+): Promise<SendMessageResponse> {
   try {
-    // Create and sign the message
-    const signedMessage = await createAndSignMessage(options, senderKeypair);
-    
-    // Send the message
+    const signedMessage = await createAndSignMessage(options, senderKeyPair);
     const result = await sendMessage(signedMessage, inboxUrl, timeoutMs);
     
-    // Add message ID for tracking
     return {
       ...result,
       messageId: signedMessage.payload.timestamp + '-' + signedMessage.payload.from.slice(-8),

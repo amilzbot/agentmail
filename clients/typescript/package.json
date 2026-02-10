@@ -1,7 +1,7 @@
 {
-    "name": "@solana/pinocchio-counter-client",
-    "version": "0.0.1",
-    "description": "TypeScript client for Pinocchio Counter Program",
+    "name": "@agentmail/client",
+    "version": "0.1.0",
+    "description": "TypeScript client for AgentMail protocol",
     "license": "MIT",
     "type": "module",
     "main": "./dist/index.js",
@@ -16,7 +16,8 @@
         "dist"
     ],
     "scripts": {
-        "build": "tsc"
+        "build": "tsc",
+        "check": "tsc --noEmit"
     },
     "peerDependencies": {
         "@solana/kit": "^6.0.1"

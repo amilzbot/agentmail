@@ -10,14 +10,12 @@ import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
 import {
-  createKey,
-  getAddressFromKey,
-  type CryptoKeyPair,
+  generateKeyPair,
+  createKeyPairFromBytes,
+  getAddressFromPublicKey,
   type Address,
 } from '@solana/kit';
 import { 
-  createAndSignMessage,
-  sendMessage,
   verifyAgentMailMessage,
   createSignAndSendMessage,
   type CreateMessageOptions,
@@ -25,7 +23,6 @@ import {
 import {
   lookupAgentRegistry,
   getAgentInboxUrl,
-  findAgentRegistryPda,
 } from './registry.js';
 
 // Configuration
@@ -47,8 +44,8 @@ async function getOrCreateKeypair(): Promise<{ keyPair: CryptoKeyPair; address: 
   if (existsSync(KEYPAIR_PATH)) {
     try {
       const keyData = JSON.parse(readFileSync(KEYPAIR_PATH, 'utf8'));
-      const keyPair = await createKey({ fromBytes: new Uint8Array(keyData) });
-      const address = getAddressFromKey(keyPair);
+      const keyPair = await createKeyPairFromBytes(new Uint8Array(keyData));
+      const address = await getAddressFromPublicKey(keyPair.publicKey);
       return { keyPair, address };
     } catch (error) {
       console.error('Failed to load existing keypair:', error);
@@ -58,13 +55,19 @@ async function getOrCreateKeypair(): Promise<{ keyPair: CryptoKeyPair; address: 
 
   // Create new keypair
   console.log('Creating new keypair...');
-  const keyPair = await createKey();
-  const address = getAddressFromKey(keyPair);
+  const keyPair = await generateKeyPair();
+  const address = await getAddressFromPublicKey(keyPair.publicKey);
   
-  // Save keypair (this is a simplified save - in production you'd want proper key management)
+  // Export and save the keypair bytes
   try {
-    const keyBytes = await crypto.subtle.exportKey('raw', keyPair.privateKey);
-    writeFileSync(KEYPAIR_PATH, JSON.stringify(Array.from(new Uint8Array(keyBytes))));
+    const privateKeyBytes = new Uint8Array(await crypto.subtle.exportKey('pkcs8', keyPair.privateKey));
+    const publicKeyBytes = new Uint8Array(await crypto.subtle.exportKey('raw', keyPair.publicKey));
+    // Store as 64-byte array: 32 private + 32 public (Solana convention)
+    const combined = new Uint8Array(64);
+    // pkcs8 wraps the raw key; for Ed25519 the raw 32 bytes are at the end
+    combined.set(privateKeyBytes.slice(-32), 0);
+    combined.set(publicKeyBytes, 32);
+    writeFileSync(KEYPAIR_PATH, JSON.stringify(Array.from(combined)));
     console.log(`Keypair saved to ${KEYPAIR_PATH}`);
     console.log(`Your AgentMail address: ${address}`);
   } catch (error) {
@@ -76,6 +79,17 @@ async function getOrCreateKeypair(): Promise<{ keyPair: CryptoKeyPair; address: 
 }
 
 /**
+ * Create an RPC client for registry lookups.
+ * Currently uses devnet.
+ */
+function createRpc() {
+  // Lazy import to avoid pulling in RPC deps when not needed
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { createSolanaRpc } = require('@solana/kit');
+  return createSolanaRpc('https://api.devnet.solana.com');
+}
+
+/**
  * Register command
  */
 program
@@ -83,7 +97,7 @@ program
   .description('Register your agent on-chain with name and inbox URL')
   .requiredOption('--name <name>', 'Agent name (max 64 characters)')
   .requiredOption('--inbox-url <url>', 'HTTPS inbox URL (max 256 characters)')
-  .action(async (options) => {
+  .action(async (options: { name: string; inboxUrl: string }) => {
     console.log('🔄 Registering agent...');
     console.log('⚠️  On-chain registration not implemented yet (requires deployed program)');
     console.log(`Name: ${options.name}`);
@@ -108,7 +122,15 @@ program
   .requiredOption('--body <body>', 'Message body (markdown)')
   .option('--thread-id <id>', 'Thread ID for grouping messages')
   .option('--reply-to <id>', 'Message ID this is replying to')
-  .action(async (options) => {
+  .action(async (options: {
+    to: string;
+    toAddress?: string;
+    inboxUrl?: string;
+    subject?: string;
+    body: string;
+    threadId?: string;
+    replyTo?: string;
+  }) => {
     console.log('📤 Sending message...');
     
     const { keyPair, address } = await getOrCreateKeypair();
@@ -124,14 +146,15 @@ program
       
       console.log(`🔍 Looking up inbox URL for ${options.to}...`);
       try {
-        recipientInboxUrl = await getAgentInboxUrl(options.to as Address);
+        const rpc = createRpc();
+        recipientInboxUrl = await getAgentInboxUrl(rpc, options.to as Address) ?? undefined;
         if (!recipientInboxUrl) {
           console.error(`❌ Agent ${options.to} not found in registry`);
           process.exit(1);
         }
         console.log(`✅ Found inbox: ${recipientInboxUrl}`);
       } catch (error) {
-        console.error(`❌ Registry lookup failed:`, error);
+        console.error('❌ Registry lookup failed:', error);
         process.exit(1);
       }
     }
@@ -172,7 +195,7 @@ program
   .command('inbox')
   .description('List received messages')
   .option('--limit <n>', 'Number of messages to show', '10')
-  .action(async (options) => {
+  .action(async (options: { limit: string }) => {
     console.log('📬 Checking inbox...');
     console.log('⚠️  Inbox server not implemented yet');
     console.log('💡 Messages would be stored locally when you run an inbox server');
@@ -189,7 +212,7 @@ program
         console.log('📭 No messages found');
       } else {
         console.log(`📨 Found ${messages.length} messages:`);
-        messages.forEach((msg, i) => {
+        messages.forEach((msg: { from: string; subject?: string; timestamp: string }, i: number) => {
           console.log(`${i + 1}. From: ${msg.from} | Subject: ${msg.subject || '(no subject)'} | Time: ${msg.timestamp}`);
         });
       }
@@ -205,7 +228,7 @@ program
   .command('verify')
   .description('Verify a signed message')
   .requiredOption('--message <json>', 'Signed message envelope (JSON)')
-  .action(async (options) => {
+  .action(async (options: { message: string }) => {
     console.log('🔍 Verifying message...');
     
     try {
@@ -236,18 +259,19 @@ program
   .command('lookup')
   .description('Look up an agent in the registry')
   .requiredOption('--address <address>', 'Agent address to look up')
-  .action(async (options) => {
+  .action(async (options: { address: string }) => {
     console.log(`🔍 Looking up agent ${options.address}...`);
     
     try {
-      const registry = await lookupAgentRegistry(options.address as Address);
+      const rpc = createRpc();
+      const registry = await lookupAgentRegistry(rpc, options.address as Address);
       
       if (registry) {
         console.log('✅ Agent found:');
         console.log(`Name: ${registry.name}`);
         console.log(`Inbox URL: ${registry.inboxUrl}`);
-        console.log(`Created: ${new Date(registry.createdAt * 1000).toISOString()}`);
-        console.log(`Updated: ${new Date(registry.updatedAt * 1000).toISOString()}`);
+        console.log(`Created: ${new Date(Number(registry.createdAt) * 1000).toISOString()}`);
+        console.log(`Updated: ${new Date(Number(registry.updatedAt) * 1000).toISOString()}`);
       } else {
         console.log('❌ Agent not found in registry');
         process.exit(1);
@@ -273,7 +297,8 @@ program
     console.log(`📁 Config Dir: ${CONFIG_DIR}`);
     
     try {
-      const registry = await lookupAgentRegistry(address);
+      const rpc = createRpc();
+      const registry = await lookupAgentRegistry(rpc, address);
       if (registry) {
         console.log('\\n📋 Registry Status: ✅ Registered');
         console.log(`📝 Name: ${registry.name}`);
@@ -282,12 +307,12 @@ program
         console.log('\\n📋 Registry Status: ❌ Not registered');
         console.log('💡 Run `agentmail register --name <name> --inbox-url <url>` to register');
       }
-    } catch (error) {
+    } catch {
       console.log('\\n📋 Registry Status: ⚠️  Cannot check (registry not available)');
     }
     
     console.log('\\n🌐 Network: devnet');
-    console.log('🏛️  Program: (will show deployed program ID when available)');
+    console.log(`🏛️  Program: AMz2ybwRihFL9X4igLBtqNBEe9qqb4yUvjwNwEaPjNiX`);
   });
 
 // Parse arguments and run
