@@ -1,0 +1,211 @@
+{
+  "project": "agentmail",
+  "description": "Decentralized agent-to-agent messaging protocol on Solana",
+  "deadline": "2026-02-12",
+  "decisions": {
+    "registry": "Custom Pinocchio program (not SAS). Simpler, purpose-built, faster to ship.",
+    "signing": "Solana offchain messages (@solana/kit OffchainMessage, sRFC 3). Standard, secure, built-in versioning.",
+    "client": "@solana/kit v6+ TypeScript. Never @solana/web3.js.",
+    "program_keypair": "Vanity grind — starts with 'am' (agentmail), ends with 'nix' (easter egg). solana-keygen grind."
+  },
+  "phases": [
+    {
+      "name": "Research & Setup",
+      "tasks": [
+        {
+          "id": "setup-01",
+          "description": "Scaffold project from pinocchio-counter template (create-solana-dapp)",
+          "status": "todo",
+          "notes": "npx create-solana-dapp -t solana-foundation/templates/pinocchio/pinocchio-counter"
+        },
+        {
+          "id": "research-01",
+          "description": "Research Solana offchain message signing (@solana/kit OffchainMessage, sRFC 3) — confirm it meets our signing/verification needs",
+          "status": "todo",
+          "notes": "Decision made to use offchain messages. Need to confirm: can we embed arbitrary JSON as message text? Signature portability? Verification without kit?"
+        },
+        {
+          "id": "spec-01",
+          "description": "Finalize message format spec (JSON schema, signing canonicalization, version strategy)",
+          "status": "todo",
+          "notes": "Define exactly what bytes get signed, field ordering, encoding. Integrate with offchain message spec."
+        }
+      ]
+    },
+    {
+      "name": "On-Chain Registry Program",
+      "tasks": [
+        {
+          "id": "program-01",
+          "description": "Define AgentRegistry account state struct (PDA layout, serialization, traits)",
+          "status": "todo",
+          "notes": "Fields: discriminator, version, authority, name, inbox_url, created_at, updated_at"
+        },
+        {
+          "id": "program-02",
+          "description": "Implement 'register' instruction — create PDA, initialize fields, validate inputs",
+          "status": "todo",
+          "notes": "PDA seeds: [\"agentmail\", agent_pubkey]. Agent must sign."
+        },
+        {
+          "id": "program-03",
+          "description": "Implement 'update' instruction — modify name/inbox_url, authority-only",
+          "status": "todo",
+          "notes": "Only the authority (agent) can update their own registry entry"
+        },
+        {
+          "id": "program-04",
+          "description": "Implement 'deregister' instruction — close account, reclaim rent",
+          "status": "todo",
+          "notes": "Transfer lamports back to authority, zero account data"
+        },
+        {
+          "id": "program-05",
+          "description": "Set up Codama IDL generation (build.rs, instruction definitions)",
+          "status": "todo",
+          "notes": "Follow pinocchio template patterns for CodamaInstructions derive"
+        },
+        {
+          "id": "program-06",
+          "description": "Write LiteSVM integration tests for all instructions",
+          "status": "todo",
+          "notes": "Test register, update, deregister, error cases, PDA derivation"
+        },
+        {
+          "id": "program-07",
+          "description": "Grind vanity program keypair — starts with 'am', ends with 'nix'",
+          "status": "todo",
+          "notes": "solana-keygen grind --starts-and-ends-with am:nix:1 --ignore-case. Case-insensitive speeds it up significantly."
+        },
+        {
+          "id": "program-08",
+          "description": "Build program (.so) with cargo-build-sbf",
+          "status": "todo",
+          "notes": "Compile to BPF target for deployment"
+        },
+        {
+          "id": "program-09",
+          "description": "Deploy program to devnet",
+          "status": "todo",
+          "notes": "solana program deploy with vanity keypair"
+        },
+        {
+          "id": "program-10",
+          "description": "Deploy IDL to devnet using program-metadata",
+          "status": "todo",
+          "notes": "program-metadata write idl <program-id> idl/agentmail.json --keypair <deployer> --rpc devnet. See escrow justfile for reference."
+        }
+      ]
+    },
+    {
+      "name": "Client Library & CLI",
+      "tasks": [
+        {
+          "id": "client-01",
+          "description": "Generate TypeScript client from Codama IDL",
+          "status": "todo",
+          "notes": "scripts/generate-clients.ts — produces typed helpers for all instructions"
+        },
+        {
+          "id": "client-02",
+          "description": "Implement registry lookup — fetch agent's inbox_url by pubkey from on-chain PDA",
+          "status": "todo",
+          "notes": "Derive PDA, fetch account, deserialize"
+        },
+        {
+          "id": "client-03",
+          "description": "Implement message signing using @solana/kit offchain messages",
+          "status": "todo",
+          "notes": "Create OffchainMessage with agentmail JSON as content, sign with agent keypair"
+        },
+        {
+          "id": "client-04",
+          "description": "Implement message sending — HTTPS POST signed message to recipient's inbox_url",
+          "status": "todo",
+          "notes": "Lookup registry → sign message → POST to inbox_url → handle response"
+        },
+        {
+          "id": "client-05",
+          "description": "Implement signature verification — verify received message using @solana/kit verifyOffchainMessageEnvelope",
+          "status": "todo",
+          "notes": "Counterpart to client-03"
+        },
+        {
+          "id": "client-06",
+          "description": "Build CLI with commands: register, send, inbox, verify, lookup",
+          "status": "todo",
+          "notes": "TypeScript CLI (bun). Should also work with npx."
+        }
+      ]
+    },
+    {
+      "name": "Inbox Server",
+      "tasks": [
+        {
+          "id": "inbox-01",
+          "description": "HTTP server — POST /inbox endpoint that receives signed messages",
+          "status": "todo",
+          "notes": "Lightweight Bun/Node HTTP server. Verify signature, store message."
+        },
+        {
+          "id": "inbox-02",
+          "description": "Signature verification middleware — reject messages with invalid signatures",
+          "status": "todo",
+          "notes": "Verify offchain message envelope, optionally verify sender is registered on-chain"
+        },
+        {
+          "id": "inbox-03",
+          "description": "Message storage — persist received messages to local filesystem (JSON files)",
+          "status": "todo",
+          "notes": "Simple file-based storage. inbox/<timestamp>-<from>.json"
+        },
+        {
+          "id": "inbox-04",
+          "description": "GET /inbox endpoint — list received messages (for CLI polling)",
+          "status": "todo",
+          "notes": "Returns list of messages, supports pagination/filtering"
+        }
+      ]
+    },
+    {
+      "name": "Integration & Demo",
+      "tasks": [
+        {
+          "id": "demo-01",
+          "description": "End-to-end test: two agents register, exchange messages, verify",
+          "status": "todo",
+          "notes": "Script or test that demonstrates the full flow"
+        },
+        {
+          "id": "demo-02",
+          "description": "Write README with overview, architecture diagram, setup instructions, usage examples",
+          "status": "todo",
+          "notes": "Should be compelling for hackathon judges"
+        },
+        {
+          "id": "demo-03",
+          "description": "OpenClaw skill packaging (if time permits)",
+          "status": "todo",
+          "notes": "SKILL.md + scripts for agent integration. Nice-to-have."
+        }
+      ]
+    },
+    {
+      "name": "Hackathon Submission",
+      "tasks": [
+        {
+          "id": "hack-01",
+          "description": "Register for Colosseum Agent Hackathon",
+          "status": "todo",
+          "notes": "curl -s https://colosseum.com/skill.md for registration flow"
+        },
+        {
+          "id": "hack-02",
+          "description": "Submit project to Colosseum before Feb 12 deadline",
+          "status": "todo",
+          "notes": "Repo, demo, description"
+        }
+      ]
+    }
+  ]
+}
