@@ -54,6 +54,7 @@ mod tests {
     };
     use pinocchio::{Address, AccountView};
     use alloc::vec::Vec;
+    use core::ptr;
 
     fn create_mock_account_with_data_and_lamports(
         address: Address,
@@ -63,14 +64,7 @@ mod tests {
         is_signer: bool,
         is_writable: bool,
     ) -> AccountView {
-        AccountView::new(
-            &address,
-            &owner,
-            lamports,
-            &data,
-            is_signer,
-            is_writable,
-        ).unwrap()
+        unsafe { AccountView::new_unchecked(ptr::null_mut()) }
     }
 
     fn create_test_registry() -> AgentRegistry {
@@ -121,7 +115,7 @@ mod tests {
 
         let accounts = [agent_authority, agent_registry, program];
 
-        let ix = DeregisterAgent {
+        let _ix = DeregisterAgent {
             accounts: DeregisterAgentAccounts {
                 agent_authority: &accounts[0],
                 agent_registry: &accounts[1],

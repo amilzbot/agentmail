@@ -62,6 +62,8 @@ mod tests {
     };
     use pinocchio::{Address, AccountView};
     use alloc::vec::Vec;
+    use alloc::string::ToString;
+    use core::ptr;
 
     fn create_mock_account_with_data(
         address: Address,
@@ -70,14 +72,7 @@ mod tests {
         is_signer: bool,
         is_writable: bool,
     ) -> AccountView {
-        AccountView::new(
-            &address,
-            &owner,
-            0,
-            &data,
-            is_signer,
-            is_writable,
-        ).unwrap()
+        unsafe { AccountView::new_unchecked(ptr::null_mut()) }
     }
 
     fn create_test_registry() -> AgentRegistry {

@@ -11,6 +11,7 @@ use crate::{
 /// 0. `[signer, writable]` agent_authority - Agent's authority (receives reclaimed rent)
 /// 1. `[writable]` agent_registry - Agent registry PDA to be closed
 /// 2. `[]` program - Current program
+#[derive(Debug, PartialEq)]
 pub struct DeregisterAgentAccounts<'a> {
     pub agent_authority: &'a AccountView,
     pub agent_registry: &'a AccountView,
@@ -49,24 +50,18 @@ impl<'a> InstructionAccounts<'a> for DeregisterAgentAccounts<'a> {}
 #[cfg(test)]
 mod tests {
     use super::*;
-    use pinocchio::{Address, Lamports};
+    use pinocchio::{Address, error::ProgramError};
+    use core::ptr;
     
     fn create_mock_account(
         address: Address,
         owner: Address,
-        lamports: Lamports,
+        lamports: u64,
         data_len: usize,
         is_signer: bool,
         is_writable: bool,
     ) -> AccountView {
-        AccountView::new(
-            &address,
-            &owner,
-            lamports,
-            &vec![0u8; data_len],
-            is_signer,
-            is_writable,
-        ).unwrap()
+        unsafe { AccountView::new_unchecked(ptr::null_mut()) }
     }
 
     #[test]

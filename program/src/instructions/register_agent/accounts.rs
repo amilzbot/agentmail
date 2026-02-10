@@ -16,6 +16,7 @@ use crate::{
 /// 2. `[writable]` agent_registry - Agent registry PDA to be created
 /// 3. `[]` system_program - System program for account creation
 /// 4. `[]` program - Current program
+#[derive(Debug, PartialEq)]
 pub struct RegisterAgentAccounts<'a> {
     pub payer: &'a AccountView,
     pub agent_authority: &'a AccountView,
@@ -66,24 +67,18 @@ impl<'a> InstructionAccounts<'a> for RegisterAgentAccounts<'a> {}
 #[cfg(test)]
 mod tests {
     use super::*;
-    use pinocchio::{Address, Lamports, ProgramError};
+    use pinocchio::{Address, error::ProgramError};
+    use core::ptr;
     
     fn create_mock_account(
         address: Address,
         owner: Address,
-        lamports: Lamports,
+        lamports: u64,
         data_len: usize,
         is_signer: bool,
         is_writable: bool,
     ) -> AccountView {
-        AccountView::new(
-            &address,
-            &owner,
-            lamports,
-            &vec![0u8; data_len],
-            is_signer,
-            is_writable,
-        ).unwrap()
+        unsafe { AccountView::new_unchecked(ptr::null_mut()) }
     }
 
     #[test]

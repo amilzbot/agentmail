@@ -11,6 +11,7 @@ use crate::{require_len, traits::InstructionData, errors::AgentMailProgramError}
 /// * `name` (variable) - Agent name (UTF-8)
 /// * `inbox_url_len` (u32, LE) - Length of inbox URL
 /// * `inbox_url` (variable) - Inbox URL (UTF-8)
+#[derive(Debug, PartialEq)]
 pub struct RegisterAgentData {
     pub bump: u8,
     pub name: String,
@@ -92,6 +93,7 @@ impl<'a> InstructionData<'a> for RegisterAgentData {
 mod tests {
     use super::*;
     use alloc::vec::Vec;
+    use alloc::borrow::ToOwned;
 
     fn create_test_data(bump: u8, name: &str, url: &str) -> Vec<u8> {
         let mut data = Vec::new();

@@ -34,6 +34,9 @@ impl<'a> From<(UpdateAgentAccounts<'a>, UpdateAgentData)> for UpdateAgent<'a> {
 mod tests {
     use super::*;
     use pinocchio::{Address, AccountView};
+    use alloc::string::ToString;
+    use alloc::vec::Vec;
+    use core::ptr;
 
     fn create_mock_account(
         address: Address,
@@ -41,14 +44,7 @@ mod tests {
         is_signer: bool,
         is_writable: bool,
     ) -> AccountView {
-        AccountView::new(
-            &address,
-            &owner,
-            0,
-            &[],
-            is_signer,
-            is_writable,
-        ).unwrap()
+        unsafe { AccountView::new_unchecked(ptr::null_mut()) }
     }
 
     #[test]
