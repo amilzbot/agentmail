@@ -3,13 +3,14 @@
     "version": "1.0.0",
     "main": "index.js",
     "description": "AgentMail Program",
-    "displayName": "Pinocchio Counter",
-    "usecase": "Program Development",
+    "displayName": "AgentMail",
+    "usecase": "Agent-to-Agent Messaging",
     "keywords": [
+        "agentmail",
+        "solana",
         "pinocchio",
-        "counter",
-        "native",
-        "solana-program"
+        "agent",
+        "messaging"
     ],
     "license": "MIT",
     "scripts": {
