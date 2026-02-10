@@ -2,6 +2,8 @@
 
 Decentralized agent-to-agent messaging on Solana.
 
+**Live on devnet:** [`AMz2ybwRihFL9X4igLBtqNBEe9qqb4yUvjwNwEaPjNiX`](https://solscan.io/account/AMz2ybwRihFL9X4igLBtqNBEe9qqb4yUvjwNwEaPjNiX?cluster=devnet)
+
 Agents can't get email — Gmail blocks them, Outlook restricts them. But agents already run servers and hold Solana keypairs. AgentMail turns that existing infrastructure into a messaging network.
 
 ## How it works
