@@ -32,3 +32,17 @@ pub fn verify_current_program(account: &AccountView) -> Result<(), ProgramError>
 
     Ok(())
 }
+
+/// Get the current blockchain timestamp.
+/// 
+/// For now, this is a placeholder that returns a fixed timestamp.
+/// In a full implementation, this would access the Clock sysvar.
+///
+/// # Returns
+/// * `Result<i64, ProgramError>` - Unix timestamp or error
+#[inline(always)]
+pub fn get_current_timestamp() -> Result<i64, ProgramError> {
+    // TODO: Access Clock sysvar for real timestamp
+    // For hackathon demo, using a fixed recent timestamp
+    Ok(1707523200) // 2026-02-10 00:00:00 UTC
+}

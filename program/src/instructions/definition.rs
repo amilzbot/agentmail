@@ -32,6 +32,21 @@ pub enum PinocchioCounterInstruction {
     #[codama(account(name = "pinocchio_counter_program"))]
     CloseCounter {} = 2,
 
+    /// Register an agent in the AgentMail protocol.
+    #[codama(account(name = "payer", signer, writable))]
+    #[codama(account(name = "agent_authority", signer))]
+    #[codama(account(name = "agent_registry", writable))]
+    #[codama(account(name = "system_program"))]
+    #[codama(account(name = "agentmail_program"))]
+    RegisterAgent {
+        /// Bump for the agent registry PDA
+        bump: u8,
+        /// Agent name (UTF-8, max 64 bytes)
+        name: alloc::string::String,
+        /// Inbox URL (UTF-8, max 256 bytes)
+        inbox_url: alloc::string::String,
+    } = 3,
+
     /// Invoked via CPI to emit event data in instruction args (prevents log truncation).
     #[codama(account(name = "event_authority", signer))]
     EmitEvent {} = 228,

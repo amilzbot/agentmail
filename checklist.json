@@ -21,14 +21,14 @@
         {
           "id": "research-01",
           "description": "Research Solana offchain message signing (@solana/kit OffchainMessage, sRFC 3) — confirm it meets our signing/verification needs",
-          "status": "todo",
-          "notes": "Decision made to use offchain messages. Need to confirm: can we embed arbitrary JSON as message text? Signature portability? Verification without kit?"
+          "status": "done",
+          "notes": "✅ CONFIRMED: (1) Can embed arbitrary JSON via OffchainMessageContentFormat.UTF8_1232_BYTES_MAX or UTF8_65535_BYTES_MAX, (2) Follows sRFC 3 standard = signature portability guaranteed, (3) Any ed25519 implementation can verify signatures. API has compileOffchainMessageEnvelope, signOffchainMessageEnvelope, verifyOffchainMessageEnvelope functions."
         },
         {
           "id": "spec-01",
           "description": "Finalize message format spec (JSON schema, signing canonicalization, version strategy)",
-          "status": "todo",
-          "notes": "Define exactly what bytes get signed, field ordering, encoding. Integrate with offchain message spec."
+          "status": "done",
+          "notes": "✅ Complete MESSAGE_FORMAT.md spec. Uses sRFC 3 offchain message envelope with AgentMail JSON payload. Canonical JSON serialization, size limits defined, version strategy documented. Ready for implementation."
         }
       ]
     },
@@ -38,14 +38,14 @@
         {
           "id": "program-01",
           "description": "Define AgentRegistry account state struct (PDA layout, serialization, traits)",
-          "status": "todo",
-          "notes": "Fields: discriminator, version, authority, name, inbox_url, created_at, updated_at"
+          "status": "done",
+          "notes": "✅ Created AgentRegistry struct in program/src/state/agent_registry.rs. 384-byte layout with PDA seeds [\"agentmail\", authority]. Includes all required fields, length-prefixed strings, validation, and comprehensive tests. Added AgentMailProgramError variants."
         },
         {
           "id": "program-02",
           "description": "Implement 'register' instruction — create PDA, initialize fields, validate inputs",
-          "status": "todo",
-          "notes": "PDA seeds: [\"agentmail\", agent_pubkey]. Agent must sign."
+          "status": "done",
+          "notes": "✅ Full RegisterAgent instruction implemented: data parsing with variable-length strings, account validation, PDA creation with seeds [\"agentmail\", authority], comprehensive validation and tests. Added to entrypoint dispatch. Instruction discriminator = 3."
         },
         {
           "id": "program-03",

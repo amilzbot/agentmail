@@ -1,0 +1,170 @@
+use alloc::string::String;
+use pinocchio::error::ProgramError;
+
+use crate::{require_len, traits::InstructionData, AgentMailProgramError};
+
+/// Instruction data for RegisterAgent
+///
+/// # Layout
+/// * `bump` (u8) - Bump for the agent registry PDA
+/// * `name_len` (u32, LE) - Length of agent name
+/// * `name` (variable) - Agent name (UTF-8)
+/// * `inbox_url_len` (u32, LE) - Length of inbox URL
+/// * `inbox_url` (variable) - Inbox URL (UTF-8)
+pub struct RegisterAgentData {
+    pub bump: u8,
+    pub name: String,
+    pub inbox_url: String,
+}
+
+impl<'a> TryFrom<&'a [u8]> for RegisterAgentData {
+    type Error = ProgramError;
+
+    #[inline(always)]
+    fn try_from(data: &'a [u8]) -> Result<Self, Self::Error> {
+        if data.is_empty() {
+            return Err(ProgramError::InvalidInstructionData);
+        }
+
+        let mut offset = 0;
+
+        // Read bump
+        require_len!(data, offset + 1);
+        let bump = data[offset];
+        offset += 1;
+
+        // Read name length
+        require_len!(data, offset + 4);
+        let name_len = u32::from_le_bytes([
+            data[offset],
+            data[offset + 1],
+            data[offset + 2],
+            data[offset + 3],
+        ]) as usize;
+        offset += 4;
+
+        // Validate name length
+        if name_len > 64 {
+            return Err(AgentMailProgramError::NameTooLong.into());
+        }
+
+        // Read name data
+        require_len!(data, offset + name_len);
+        let name_bytes = &data[offset..offset + name_len];
+        let name = String::from_utf8(name_bytes.to_vec())
+            .map_err(|_| AgentMailProgramError::InvalidUtf8)?;
+        offset += name_len;
+
+        // Read inbox URL length
+        require_len!(data, offset + 4);
+        let url_len = u32::from_le_bytes([
+            data[offset],
+            data[offset + 1],
+            data[offset + 2],
+            data[offset + 3],
+        ]) as usize;
+        offset += 4;
+
+        // Validate URL length
+        if url_len > 256 {
+            return Err(AgentMailProgramError::InboxUrlTooLong.into());
+        }
+
+        // Read inbox URL data
+        require_len!(data, offset + url_len);
+        let url_bytes = &data[offset..offset + url_len];
+        let inbox_url = String::from_utf8(url_bytes.to_vec())
+            .map_err(|_| AgentMailProgramError::InvalidUtf8)?;
+
+        Ok(Self {
+            bump,
+            name,
+            inbox_url,
+        })
+    }
+}
+
+impl<'a> InstructionData<'a> for RegisterAgentData {
+    const LEN: usize = 0; // Variable length, so we override validation
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use alloc::vec::Vec;
+
+    fn create_test_data(bump: u8, name: &str, url: &str) -> Vec<u8> {
+        let mut data = Vec::new();
+        data.push(bump);
+        
+        let name_bytes = name.as_bytes();
+        data.extend_from_slice(&(name_bytes.len() as u32).to_le_bytes());
+        data.extend_from_slice(name_bytes);
+        
+        let url_bytes = url.as_bytes();
+        data.extend_from_slice(&(url_bytes.len() as u32).to_le_bytes());
+        data.extend_from_slice(url_bytes);
+        
+        data
+    }
+
+    #[test]
+    fn test_register_agent_data_try_from_valid() {
+        let data = create_test_data(200, "test-agent", "https://test.example.com/inbox");
+        let result = RegisterAgentData::try_from(&data[..]);
+        
+        assert!(result.is_ok());
+        let register_data = result.unwrap();
+        assert_eq!(register_data.bump, 200);
+        assert_eq!(register_data.name, "test-agent");
+        assert_eq!(register_data.inbox_url, "https://test.example.com/inbox");
+    }
+
+    #[test]
+    fn test_register_agent_data_try_from_empty() {
+        let data: [u8; 0] = [];
+        let result = RegisterAgentData::try_from(&data[..]);
+        assert!(matches!(result, Err(ProgramError::InvalidInstructionData)));
+    }
+
+    #[test]
+    fn test_register_agent_data_name_too_long() {
+        let long_name = "a".repeat(65);
+        let data = create_test_data(200, &long_name, "https://test.example.com/inbox");
+        let result = RegisterAgentData::try_from(&data[..]);
+        assert_eq!(result, Err(AgentMailProgramError::NameTooLong.into()));
+    }
+
+    #[test]
+    fn test_register_agent_data_url_too_long() {
+        let long_url = "https://".to_owned() + &"a".repeat(250);
+        let data = create_test_data(200, "test", &long_url);
+        let result = RegisterAgentData::try_from(&data[..]);
+        assert_eq!(result, Err(AgentMailProgramError::InboxUrlTooLong.into()));
+    }
+
+    #[test]
+    fn test_register_agent_data_invalid_utf8() {
+        let mut data = Vec::new();
+        data.push(200u8); // bump
+        data.extend_from_slice(&4u32.to_le_bytes()); // name length
+        data.extend_from_slice(&[0xFF, 0xFE, 0xFD, 0xFC]); // invalid UTF-8
+        data.extend_from_slice(&4u32.to_le_bytes()); // url length
+        data.extend_from_slice(b"test"); // valid URL
+
+        let result = RegisterAgentData::try_from(&data[..]);
+        assert_eq!(result, Err(AgentMailProgramError::InvalidUtf8.into()));
+    }
+
+    #[test]
+    fn test_register_agent_data_minimum_data() {
+        let data = create_test_data(255, "", "");
+        let result = RegisterAgentData::try_from(&data[..]);
+        
+        assert!(result.is_ok());
+        let register_data = result.unwrap();
+        assert_eq!(register_data.bump, 255);
+        assert_eq!(register_data.name, "");
+        assert_eq!(register_data.inbox_url, "");
+    }
+}
