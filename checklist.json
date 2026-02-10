@@ -56,8 +56,8 @@
         {
           "id": "program-04",
           "description": "Implement 'deregister' instruction — close account, reclaim rent",
-          "status": "todo",
-          "notes": "Transfer lamports back to authority, zero account data"
+          "status": "done",
+          "notes": "✅ DeregisterAgent instruction implemented: authority validation, lamports transfer back to authority, account data zeroing. Discriminator = 5. Includes comprehensive tests for account closure and rent reclamation."
         },
         {
           "id": "program-05",
