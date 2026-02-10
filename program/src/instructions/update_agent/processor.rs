@@ -1,11 +1,11 @@
-use pinocchio::{account::AccountView, error::ProgramError, Address, ProgramResult};
+use pinocchio::{account::AccountView, Address, ProgramResult};
 
 use crate::{
     instructions::UpdateAgent,
     state::AgentRegistry,
-    traits::{AccountSerialize, AccountSize},
+    traits::{AccountDeserialize, AccountSerialize, AccountSize, Instruction},
     utils::get_current_timestamp,
-    AgentMailProgramError,
+    errors::AgentMailProgramError,
 };
 
 /// Processes the UpdateAgent instruction.
@@ -17,7 +17,7 @@ pub fn process_update_agent(
     accounts: &[AccountView],
     instruction_data: &[u8],
 ) -> ProgramResult {
-    let ix = UpdateAgent::try_from((instruction_data, accounts))?;
+    let ix = UpdateAgent::parse(instruction_data, accounts)?;
 
     // Get current timestamp
     let timestamp = get_current_timestamp()?;
@@ -29,8 +29,8 @@ pub fn process_update_agent(
 
     // Deserialize existing registry state
     let registry_data = ix.accounts.agent_registry.try_borrow()?;
-    let mut registry = *AgentRegistry::from_bytes(&registry_data)
-        .map_err(|_| AgentMailProgramError::InvalidAccountData)?;
+    let mut registry = AgentRegistry::from_bytes(&registry_data)
+        .map_err(|_| AgentMailProgramError::InvalidAccountData)?.clone();
     
     // Release the borrow before we try to mutably borrow for writing
     drop(registry_data);

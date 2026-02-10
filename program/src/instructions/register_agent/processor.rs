@@ -6,7 +6,7 @@ use crate::{
     state::AgentRegistry,
     traits::{AccountSerialize, AccountSize, PdaSeeds},
     utils::{create_pda_account, get_current_timestamp},
-    AgentMailProgramError,
+    errors::AgentMailProgramError,
 };
 
 /// Processes the RegisterAgent instruction.

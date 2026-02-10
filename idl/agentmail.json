@@ -1,0 +1,380 @@
+{
+  "additionalPrograms": [],
+  "kind": "rootNode",
+  "program": {
+    "accounts": [
+      {
+        "data": {
+          "fields": [
+            {
+              "kind": "structFieldTypeNode",
+              "name": "bump",
+              "type": {
+                "endian": "le",
+                "format": "u8",
+                "kind": "numberTypeNode"
+              }
+            },
+            {
+              "kind": "structFieldTypeNode",
+              "name": "version",
+              "type": {
+                "endian": "le",
+                "format": "u8",
+                "kind": "numberTypeNode"
+              }
+            },
+            {
+              "kind": "structFieldTypeNode",
+              "name": "padding",
+              "type": {
+                "count": {
+                  "kind": "fixedCountNode",
+                  "value": 6
+                },
+                "item": {
+                  "endian": "le",
+                  "format": "u8",
+                  "kind": "numberTypeNode"
+                },
+                "kind": "arrayTypeNode"
+              }
+            },
+            {
+              "kind": "structFieldTypeNode",
+              "name": "authority",
+              "type": {
+                "kind": "publicKeyTypeNode"
+              }
+            },
+            {
+              "kind": "structFieldTypeNode",
+              "name": "name",
+              "type": {
+                "count": {
+                  "kind": "fixedCountNode",
+                  "value": 68
+                },
+                "item": {
+                  "endian": "le",
+                  "format": "u8",
+                  "kind": "numberTypeNode"
+                },
+                "kind": "arrayTypeNode"
+              }
+            },
+            {
+              "kind": "structFieldTypeNode",
+              "name": "inboxUrl",
+              "type": {
+                "count": {
+                  "kind": "fixedCountNode",
+                  "value": 260
+                },
+                "item": {
+                  "endian": "le",
+                  "format": "u8",
+                  "kind": "numberTypeNode"
+                },
+                "kind": "arrayTypeNode"
+              }
+            },
+            {
+              "kind": "structFieldTypeNode",
+              "name": "createdAt",
+              "type": {
+                "endian": "le",
+                "format": "i64",
+                "kind": "numberTypeNode"
+              }
+            },
+            {
+              "kind": "structFieldTypeNode",
+              "name": "updatedAt",
+              "type": {
+                "endian": "le",
+                "format": "i64",
+                "kind": "numberTypeNode"
+              }
+            }
+          ],
+          "kind": "structTypeNode"
+        },
+        "kind": "accountNode",
+        "name": "agentRegistry"
+      }
+    ],
+    "definedTypes": [],
+    "errors": [
+      {
+        "code": 0,
+        "kind": "errorNode",
+        "message": "Authority invalid or does not match registry authority",
+        "name": "invalidAuthority"
+      },
+      {
+        "code": 1,
+        "kind": "errorNode",
+        "message": "Event authority PDA is invalid",
+        "name": "invalidEventAuthority"
+      },
+      {
+        "code": 1,
+        "kind": "errorNode",
+        "message": "Agent name is too long (max 64 bytes)",
+        "name": "nameTooLong"
+      },
+      {
+        "code": 2,
+        "kind": "errorNode",
+        "message": "Inbox URL is too long (max 256 bytes)",
+        "name": "inboxUrlTooLong"
+      },
+      {
+        "code": 3,
+        "kind": "errorNode",
+        "message": "Invalid name length in stored data",
+        "name": "invalidNameLength"
+      },
+      {
+        "code": 4,
+        "kind": "errorNode",
+        "message": "Invalid inbox URL length in stored data",
+        "name": "invalidInboxUrlLength"
+      },
+      {
+        "code": 5,
+        "kind": "errorNode",
+        "message": "Invalid UTF-8 data in string fields",
+        "name": "invalidUtf8"
+      },
+      {
+        "code": 6,
+        "kind": "errorNode",
+        "message": "Agent registry already exists for this authority",
+        "name": "registryAlreadyExists"
+      },
+      {
+        "code": 7,
+        "kind": "errorNode",
+        "message": "Agent registry does not exist for this authority",
+        "name": "registryDoesNotExist"
+      },
+      {
+        "code": 8,
+        "kind": "errorNode",
+        "message": "Invalid account size for agent registry",
+        "name": "invalidAccountSize"
+      },
+      {
+        "code": 9,
+        "kind": "errorNode",
+        "message": "Invalid account data format",
+        "name": "invalidAccountData"
+      }
+    ],
+    "instructions": [
+      {
+        "accounts": [
+          {
+            "isSigner": true,
+            "isWritable": true,
+            "kind": "instructionAccountNode",
+            "name": "payer"
+          },
+          {
+            "isSigner": true,
+            "isWritable": false,
+            "kind": "instructionAccountNode",
+            "name": "agentAuthority"
+          },
+          {
+            "isSigner": false,
+            "isWritable": true,
+            "kind": "instructionAccountNode",
+            "name": "agentRegistry"
+          },
+          {
+            "isSigner": false,
+            "isWritable": false,
+            "kind": "instructionAccountNode",
+            "name": "systemProgram"
+          },
+          {
+            "isSigner": false,
+            "isWritable": false,
+            "kind": "instructionAccountNode",
+            "name": "agentmailProgram"
+          }
+        ],
+        "arguments": [
+          {
+            "defaultValue": {
+              "kind": "numberValueNode",
+              "number": 3
+            },
+            "defaultValueStrategy": "omitted",
+            "kind": "instructionArgumentNode",
+            "name": "discriminator",
+            "type": {
+              "endian": "le",
+              "format": "u8",
+              "kind": "numberTypeNode"
+            }
+          },
+          {
+            "kind": "instructionArgumentNode",
+            "name": "bump",
+            "type": {
+              "endian": "le",
+              "format": "u8",
+              "kind": "numberTypeNode"
+            }
+          },
+          {
+            "kind": "instructionArgumentNode",
+            "name": "name",
+            "type": {
+              "kind": "definedTypeLinkNode",
+              "name": "string"
+            }
+          },
+          {
+            "kind": "instructionArgumentNode",
+            "name": "inboxUrl",
+            "type": {
+              "kind": "definedTypeLinkNode",
+              "name": "string"
+            }
+          }
+        ],
+        "discriminators": [
+          {
+            "kind": "fieldDiscriminatorNode",
+            "name": "discriminator",
+            "offset": 0
+          }
+        ],
+        "kind": "instructionNode",
+        "name": "registerAgent"
+      },
+      {
+        "accounts": [
+          {
+            "isSigner": true,
+            "isWritable": false,
+            "kind": "instructionAccountNode",
+            "name": "agentAuthority"
+          },
+          {
+            "isSigner": false,
+            "isWritable": true,
+            "kind": "instructionAccountNode",
+            "name": "agentRegistry"
+          },
+          {
+            "isSigner": false,
+            "isWritable": false,
+            "kind": "instructionAccountNode",
+            "name": "agentmailProgram"
+          }
+        ],
+        "arguments": [
+          {
+            "defaultValue": {
+              "kind": "numberValueNode",
+              "number": 4
+            },
+            "defaultValueStrategy": "omitted",
+            "kind": "instructionArgumentNode",
+            "name": "discriminator",
+            "type": {
+              "endian": "le",
+              "format": "u8",
+              "kind": "numberTypeNode"
+            }
+          },
+          {
+            "kind": "instructionArgumentNode",
+            "name": "name",
+            "type": {
+              "kind": "definedTypeLinkNode",
+              "name": "string"
+            }
+          },
+          {
+            "kind": "instructionArgumentNode",
+            "name": "inboxUrl",
+            "type": {
+              "kind": "definedTypeLinkNode",
+              "name": "string"
+            }
+          }
+        ],
+        "discriminators": [
+          {
+            "kind": "fieldDiscriminatorNode",
+            "name": "discriminator",
+            "offset": 0
+          }
+        ],
+        "kind": "instructionNode",
+        "name": "updateAgent"
+      },
+      {
+        "accounts": [
+          {
+            "isSigner": true,
+            "isWritable": true,
+            "kind": "instructionAccountNode",
+            "name": "agentAuthority"
+          },
+          {
+            "isSigner": false,
+            "isWritable": true,
+            "kind": "instructionAccountNode",
+            "name": "agentRegistry"
+          },
+          {
+            "isSigner": false,
+            "isWritable": false,
+            "kind": "instructionAccountNode",
+            "name": "agentmailProgram"
+          }
+        ],
+        "arguments": [
+          {
+            "defaultValue": {
+              "kind": "numberValueNode",
+              "number": 5
+            },
+            "defaultValueStrategy": "omitted",
+            "kind": "instructionArgumentNode",
+            "name": "discriminator",
+            "type": {
+              "endian": "le",
+              "format": "u8",
+              "kind": "numberTypeNode"
+            }
+          }
+        ],
+        "discriminators": [
+          {
+            "kind": "fieldDiscriminatorNode",
+            "name": "discriminator",
+            "offset": 0
+          }
+        ],
+        "kind": "instructionNode",
+        "name": "deregisterAgent"
+      }
+    ],
+    "kind": "programNode",
+    "name": "agentmail",
+    "pdas": [],
+    "publicKey": "PinocchioTemp1ate11111111111111111111111111",
+    "version": "0.0.1"
+  },
+  "standard": "codama",
+  "version": "1.0.0"
+}

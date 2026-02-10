@@ -1,7 +1,7 @@
 use alloc::string::String;
 use pinocchio::error::ProgramError;
 
-use crate::{require_len, traits::InstructionData, AgentMailProgramError};
+use crate::{require_len, traits::InstructionData, errors::AgentMailProgramError};
 
 /// Instruction data for UpdateAgent
 ///
