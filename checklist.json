@@ -214,8 +214,8 @@
         {
           "id": "hack-02",
           "description": "Submit project to Colosseum before Feb 12 deadline",
-          "status": "todo",
-          "notes": "Repo, demo, description"
+          "status": "done",
+          "notes": "🎉 SUBMITTED! AgentMail Protocol successfully submitted to Colosseum Agent Hackathon at 2026-02-10T02:41:16.498Z. Project status changed from 'draft' to 'submitted'. Judges can now review the complete implementation."
         }
       ]
     }
