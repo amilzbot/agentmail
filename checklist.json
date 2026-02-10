@@ -87,13 +87,13 @@
           "id": "program-09",
           "description": "Deploy program to devnet",
           "status": "blocked",
-          "notes": "🚧 cargo-build-sbf failed with permission issues in container environment. Need alternative deployment approach or host access."
+          "notes": "🚧 cargo-build-sbf blocked by container environment limitations. Program builds cleanly with cargo build -p agentmail (19/19 tests pass). Vanity keypair ready: AMz2ybwRihFL9X4igLBtqNBEe9qqb4yUvjwNwEaPjNiX"
         },
         {
           "id": "program-10",
           "description": "Deploy IDL to devnet using program-metadata",
-          "status": "todo",
-          "notes": "program-metadata write idl <program-id> idl/agentmail.json --keypair <deployer> --rpc devnet. See escrow justfile for reference."
+          "status": "blocked",
+          "notes": "🚧 program-metadata tool not available in container environment. IDL generated successfully at idl/agentmail.json. Requires program deployment first."
         }
       ]
     },
