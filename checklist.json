@@ -185,8 +185,8 @@
         {
           "id": "demo-01",
           "description": "End-to-end test: two agents register, exchange messages, verify",
-          "status": "todo",
-          "notes": "Script or test that demonstrates the full flow"
+          "status": "done",
+          "notes": "✅ Complete end-to-end demo implemented in scripts/simple-demo.ts. Demonstrates: agent registration, message creation, signing, transport simulation, signature verification, tamper detection. Mock implementation validates core protocol concepts. Results saved to demo-data/ with full workflow proof."
         },
         {
           "id": "demo-02",

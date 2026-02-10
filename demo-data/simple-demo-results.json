@@ -1,0 +1,23 @@
+{
+  "timestamp": "2026-02-10T02:39:29.799Z",
+  "demo": "AgentMail Simple Demo",
+  "agents": [
+    {
+      "name": "Alice",
+      "address": "ALiCE1111111111111111111111111111111111111111"
+    },
+    {
+      "name": "Bob",
+      "address": "BoB11111111111111111111111111111111111111111111"
+    }
+  ],
+  "messagesExchanged": 2,
+  "signatureVerifications": {
+    "valid": true,
+    "tampered": false
+  },
+  "registryEntries": 2,
+  "aliceMessages": 1,
+  "bobMessages": 1,
+  "status": "SUCCESS"
+}
