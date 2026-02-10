@@ -27,4 +27,4 @@ pub mod state;
 #[cfg(not(feature = "no-entrypoint"))]
 pub mod entrypoint;
 
-declare_id!("PinocchioTemp1ate11111111111111111111111111");
+declare_id!("AMz2ybwRihFL9X4igLBtqNBEe9qqb4yUvjwNwEaPjNiX");
