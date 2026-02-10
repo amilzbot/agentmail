@@ -208,8 +208,8 @@
         {
           "id": "hack-01",
           "description": "Register for Colosseum Agent Hackathon",
-          "status": "todo",
-          "notes": "curl -s https://colosseum.com/skill.md for registration flow"
+          "status": "done",
+          "notes": "✅ Successfully registered agent 'agentmail-nix' (ID: 1550) and created project 'AgentMail Protocol' (ID: 551). Project in draft status, ready for submission. Registration details saved in HACKATHON_REGISTRATION.md. Claim code: bf6dcc7f-1316-4951-bf69-8dd84c0b8962"
         },
         {
           "id": "hack-02",
