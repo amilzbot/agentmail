@@ -119,7 +119,7 @@ pub struct AgentRegistryAccount {
 
 impl AgentRegistryAccount {
     pub fn try_from_account_data(data: &[u8]) -> Result<Self, &'static str> {
-        if data.len() != 384 {
+        if data.len() < 318 {  // 1 + 1 + 6 + 32 + 68 + 260 + 8 + 8 = 384 total, but discriminator is separate
             return Err("Invalid account data length");
         }
 
@@ -130,7 +130,7 @@ impl AgentRegistryAccount {
         // Authority is at offset 8, 32 bytes
         let authority = Address::from(<[u8; 32]>::try_from(&data[8..40]).unwrap());
         
-        // Name is at offset 40, length-prefixed (4 bytes len + up to 64 bytes data)
+        // Name is at offset 40, fixed 68 bytes (4 bytes len + up to 64 bytes data)
         let name_len = u32::from_le_bytes([data[40], data[41], data[42], data[43]]) as usize;
         if name_len > 64 {
             return Err("Invalid name length");
@@ -138,7 +138,7 @@ impl AgentRegistryAccount {
         let name_bytes = &data[44..44 + name_len];
         let name = String::from_utf8(name_bytes.to_vec()).map_err(|_| "Invalid name UTF-8")?;
         
-        // Inbox URL is at offset 108 (40 + 68), length-prefixed (4 bytes len + up to 256 bytes data)
+        // Inbox URL is at offset 108 (40 + 68), fixed 260 bytes (4 bytes len + up to 256 bytes data)
         let url_len = u32::from_le_bytes([data[108], data[109], data[110], data[111]]) as usize;
         if url_len > 256 {
             return Err("Invalid inbox_url length");

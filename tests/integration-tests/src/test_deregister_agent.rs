@@ -96,7 +96,7 @@ fn test_deregister_agent_rent_calculation() {
     
     // Get the registry account rent amount
     let registry_account = context.get_account(&agent_registry_pda.into()).unwrap();
-    let rent_amount = registry_account.lamports;
+    let _rent_amount = registry_account.lamports;
     
     // Record balances before
     let agent_balance_before = context.get_account(&agent_authority.pubkey().into()).unwrap().lamports;

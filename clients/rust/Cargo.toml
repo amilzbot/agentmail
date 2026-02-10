@@ -1,8 +1,8 @@
 [package]
-name = "pinocchio-counter-client"
+name = "agentmail-client"
 version = "0.0.1"
 edition = "2021"
-description = "Rust client for the Pinocchio Counter Program"
+description = "Rust client for the AgentMail Program"
 license = "MIT"
 
 [dependencies]

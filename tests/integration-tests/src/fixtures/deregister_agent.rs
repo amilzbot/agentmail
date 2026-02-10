@@ -2,7 +2,7 @@ use solana_sdk::{
     instruction::{AccountMeta, Instruction},
     pubkey::Pubkey,
 };
-use pinocchio_counter_client::PINOCCHIO_COUNTER_ID;
+use agentmail_client::AGENTMAIL_ID;
 
 pub fn deregister_agent(
     agent_authority: &Pubkey,
@@ -12,11 +12,11 @@ pub fn deregister_agent(
     let data = vec![5u8];
 
     Instruction {
-        program_id: PINOCCHIO_COUNTER_ID,
+        program_id: AGENTMAIL_ID,
         accounts: vec![
             AccountMeta::new(*agent_authority, true),
             AccountMeta::new(*agent_registry, false),
-            AccountMeta::new_readonly(PINOCCHIO_COUNTER_ID, false),
+            AccountMeta::new_readonly(AGENTMAIL_ID, false),
         ],
         data,
     }
@@ -43,6 +43,6 @@ mod tests {
         assert_eq!(instruction.accounts.len(), 3);
         assert_eq!(instruction.accounts[0].pubkey, agent_authority);
         assert_eq!(instruction.accounts[1].pubkey, agent_registry);
-        assert_eq!(instruction.accounts[2].pubkey, PINOCCHIO_COUNTER_ID);
+        assert_eq!(instruction.accounts[2].pubkey, AGENTMAIL_ID);
     }
 }

@@ -1,8 +1,8 @@
 use crate::utils::{Address, TestContext};
-use pinocchio_counter_client::{accounts::Counter, PINOCCHIO_COUNTER_ID};
+use agentmail_client::{accounts::AgentRegistry, AGENTMAIL_ID};
 use solana_sdk::{instruction::InstructionError, transaction::TransactionError};
 
-pub use pinocchio_counter_client::errors::PinocchioCounterError as ProgramError;
+pub use agentmail_client::errors::AgentmailError as ProgramError;
 
 pub fn assert_program_error(tx_error: TransactionError, expected: ProgramError) {
     assert_instruction_error(tx_error, InstructionError::Custom(expected as u32));
@@ -37,22 +37,38 @@ pub fn assert_custom_error(tx_error: TransactionError, expected_code: u32) {
     assert_instruction_error(tx_error, InstructionError::Custom(expected_code));
 }
 
-pub fn assert_counter_account(
+pub fn assert_agent_registry_account(
     context: &TestContext,
-    counter_pda: &Address,
+    registry_pda: &Address,
     expected_authority: &Address,
     expected_bump: u8,
-    expected_count: u8,
+    expected_name: &str,
+    expected_inbox_url: &str,
 ) {
     let account = context
-        .get_account(counter_pda)
-        .expect("Counter account should exist");
+        .get_account(registry_pda)
+        .expect("Agent registry account should exist");
 
-    assert_eq!(account.owner, PINOCCHIO_COUNTER_ID);
+    assert_eq!(account.owner, AGENTMAIL_ID);
 
-    let counter = Counter::from_bytes(&account.data).expect("Should deserialize counter account");
+    let registry = AgentRegistry::from_bytes(&account.data).expect("Should deserialize agent registry account");
 
-    assert_eq!(counter.authority.as_ref(), expected_authority.as_ref());
-    assert_eq!(counter.bump, expected_bump);
-    assert_eq!(counter.count, expected_count);
+    assert_eq!(registry.authority.as_ref(), expected_authority.as_ref());
+    assert_eq!(registry.bump, expected_bump);
+    
+    // Parse name from length-prefixed string
+    let name_len = u32::from_le_bytes([
+        registry.name[0], registry.name[1], registry.name[2], registry.name[3]
+    ]) as usize;
+    let name_str = std::str::from_utf8(&registry.name[4..4+name_len])
+        .expect("Name should be valid UTF-8");
+    assert_eq!(name_str, expected_name);
+    
+    // Parse inbox_url from length-prefixed string
+    let url_len = u32::from_le_bytes([
+        registry.inbox_url[0], registry.inbox_url[1], registry.inbox_url[2], registry.inbox_url[3]
+    ]) as usize;
+    let url_str = std::str::from_utf8(&registry.inbox_url[4..4+url_len])
+        .expect("Inbox URL should be valid UTF-8");
+    assert_eq!(url_str, expected_inbox_url);
 }

@@ -137,6 +137,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "agentmail-client"
+version = "0.0.1"
+dependencies = [
+ "borsh",
+ "num-derive",
+ "num-traits",
+ "solana-account",
+ "solana-account-info",
+ "solana-address 2.0.0",
+ "solana-client",
+ "solana-cpi",
+ "solana-instruction",
+ "solana-program-error",
+ "solana-pubkey 4.0.0",
+ "thiserror 2.0.18",
+]
+
+[[package]]
 name = "ahash"
 version = "0.8.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2797,24 +2815,6 @@ dependencies = [
  "solana-define-syscall 4.0.1",
  "solana-instruction-view",
  "solana-program-error",
-]
-
-[[package]]
-name = "pinocchio-counter-client"
-version = "0.0.1"
-dependencies = [
- "borsh",
- "num-derive",
- "num-traits",
- "solana-account",
- "solana-account-info",
- "solana-address 2.0.0",
- "solana-client",
- "solana-cpi",
- "solana-instruction",
- "solana-program-error",
- "solana-pubkey 4.0.0",
- "thiserror 2.0.18",
 ]
 
 [[package]]
@@ -6185,11 +6185,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "tests-pinocchio-counter"
+name = "tests-agentmail"
 version = "0.0.1"
 dependencies = [
+ "agentmail-client",
  "litesvm",
- "pinocchio-counter-client",
  "solana-account",
  "solana-address 2.0.0",
  "solana-program",

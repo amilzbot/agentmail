@@ -1,9 +1,10 @@
 use solana_sdk::{
     instruction::{AccountMeta, Instruction},
     pubkey::Pubkey,
-    system_program,
 };
-use pinocchio_counter_client::PINOCCHIO_COUNTER_ID;
+use agentmail_client::AGENTMAIL_ID;
+
+const SYSTEM_PROGRAM_ID: Pubkey = Pubkey::from_str_const("11111111111111111111111111111112");
 
 pub fn register_agent(
     payer: &Pubkey,
@@ -30,13 +31,13 @@ pub fn register_agent(
     data.extend_from_slice(inbox_url_bytes);
 
     Instruction {
-        program_id: PINOCCHIO_COUNTER_ID,
+        program_id: AGENTMAIL_ID,
         accounts: vec![
             AccountMeta::new(*payer, true),
             AccountMeta::new_readonly(*agent_authority, true),
             AccountMeta::new(*agent_registry, false),
-            AccountMeta::new_readonly(system_program::id(), false),
-            AccountMeta::new_readonly(PINOCCHIO_COUNTER_ID, false),
+            AccountMeta::new_readonly(SYSTEM_PROGRAM_ID, false),
+            AccountMeta::new_readonly(AGENTMAIL_ID, false),
         ],
         data,
     }

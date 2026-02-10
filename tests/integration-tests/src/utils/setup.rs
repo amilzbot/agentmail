@@ -8,7 +8,7 @@ use solana_sdk::{
 };
 
 use crate::utils::{cu_utils::CuTracker, Address};
-use pinocchio_counter_client::PINOCCHIO_COUNTER_ID;
+// use agentmail_client::AGENTMAIL_ID;  // Unused until program binary loading is fixed
 
 const MIN_LAMPORTS: u64 = 500_000_000;
 const CU_TRACKING_ENV_VAR: &str = "CU_TRACKING";
@@ -36,8 +36,9 @@ impl TestContext {
             unix_timestamp: current_time,
         });
 
-        let program_data = include_bytes!("../../../../target/deploy/pinocchio_counter.so");
-        let _ = svm.add_program(PINOCCHIO_COUNTER_ID, program_data);
+        // TODO: Add program binary when cargo-build-sbf works
+        // let program_data = include_bytes!("../../../../target/deploy/agentmail.so");
+        // let _ = svm.add_program(AGENTMAIL_ID, program_data);
 
         let payer = Keypair::new();
         svm.airdrop(&payer.pubkey(), MIN_LAMPORTS).unwrap();

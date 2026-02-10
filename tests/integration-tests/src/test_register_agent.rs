@@ -1,10 +1,9 @@
-use solana_sdk::{signature::Keypair, signer::Signer, transaction::TransactionError};
+use solana_sdk::{signer::Signer, transaction::TransactionError};
 
 use crate::{
     fixtures::register_agent::register_agent,
     utils::{
         pda_utils::find_agent_registry_pda, setup::TestContext, test_helpers::AgentRegistryAccount,
-        Address,
     },
 };
 
